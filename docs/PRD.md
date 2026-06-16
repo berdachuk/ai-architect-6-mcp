@@ -1,12 +1,22 @@
 # Product Requirements Document
 ## Medical MCP Server (`medical-mcp-server`)
 
-**Version:** 1.5.0  
+**Version:** 1.6.0  
 **Date:** 2026-06-16  
 **Author:** Siarhei Berdachuk  
 **Status:** Draft  
 **Implementation plan:** [PLAN.md](PLAN.md)  
 **Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)
+
+### Documentation index
+
+| Document | Purpose |
+|---|---|
+| [README.md](README.md) | Documentation index |
+| [PLAN.md](PLAN.md) | Architecture, class design, milestones |
+| [USE_CASES.md](USE_CASES.md) | Actors, workflows, per-tool scenarios |
+| [TESTING.md](TESTING.md) | Test pyramid, response quality on test split |
+| [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) | Future: optional `prompt-lab` profile — PRD §18, M9/M10 |
 
 ---
 
@@ -99,13 +109,17 @@ Verified via [HuggingFace Datasets API](https://datasets-server.huggingface.co/i
 - Be consumable by Claude Desktop and `McpSyncClient` inside `med-expert-match-ce`
 - Use **Spring Modulith** package modules with explicit `allowedDependencies` (same approach as [`med-expert-match-ce`](https://github.com/berdachuk/med-expert-match-ce))
 - Enforce **interface / implementation separation** — public contracts in `service/` and `repository/`; JDBC and framework code only in `impl/` subpackages
+- Verify **retrieval response quality** on the held-out **test** split (FTS + semantic metrics — see [TESTING.md](TESTING.md))
+- Maintain a **use case catalog** aligned with dataset fields ([USE_CASES.md](USE_CASES.md))
 
 ### Non-Goals
 
-- Does not retrain or fine-tune classifiers
-- Does not expose a REST API — MCP is the only external contract
+- Does not retrain or fine-tune classifiers via production MCP tools
+- Does not expose a REST API — MCP is the only external contract (default profile)
 - Does not manage dataset versioning or HuggingFace sync
 - Does not provide a UI
+- Does not expose MCP **completions** (`@McpComplete`) — incompatible with UUID-based case identity
+- Does not provide a production **specialty classification API** — optional `prompt-lab` profile is future scope ([§18](#18-future-scope-optional))
 
 ---
 
@@ -303,6 +317,8 @@ Injects dataset fields from a case into an LLM prompt template. **No completion 
 | prompts | yes | 1 prompt — dataset-field focus only |
 | completion | **no** | Not compatible with UUID-based case identity |
 
+---
+
 ## 7. Data Loading
 
 Dataset loaded **once at startup** via `CommandLineRunner`. Skipped if `SELECT COUNT(*) FROM medical_case > 0` (idempotent restart).
@@ -347,6 +363,17 @@ medicalmcp:
 | JDBC only | No JPA/Hibernate — `NamedParameterJdbcTemplate` throughout |
 | Embedding pool | `medicalmcp.embedding.multi-endpoint.endpoints` must contain ≥1 valid URL; fail fast at startup |
 | Modularity | `ApplicationModules.of(...).verify()` passes — no illegal cross-module references |
+| Retrieval quality | FTS + semantic benchmarks on **test** split meet gates in [TESTING.md](TESTING.md) §6 |
+
+### Domain records (`medicalcase/domain`)
+
+| Record | Fields (summary) | Used by |
+|---|---|---|
+| `MedicalCase` | All HF columns + `id`, `split`, `createdAt` | `get_case`, resources, prompts |
+| `CaseSummary` | `id`, `sampleName`, `description`, `medicalSpecialty`, `keywords`, `split` | `search_cases`, result bodies |
+| `SemanticMatch` | `caseSummary`, `similarity` | `semantic_search` |
+| `SpecialtyCount` | `specialty`, `count` | `list_specialties` |
+| `DatasetStats` | `totalCases`, `bySpecialty`, `bySplit` | `get_dataset_stats`, `medical://stats` |
 
 ---
 
@@ -427,7 +454,9 @@ medical-mcp-server/
     │       ├── db/migration/        # V1__init_medical_cases.sql
     │       └── sql/                 # optional per-module SQL (@InjectSql)
     └── test/java/com/example/medicalmcp/
-        └── ModulithArchitectureTest.java
+        ├── ModulithArchitectureTest.java
+        ├── integration/                   # Testcontainers — see TESTING.md
+        └── quality/                       # test-split benchmarks — see TESTING.md
 ```
 
 ---
@@ -489,7 +518,7 @@ spring:
     mcp:
       server:
         name: medical-mcp-server
-        version: 1.5.0
+        version: 1.6.0
         type: SYNC
         instructions: >
           Wraps hpe-ai/medical-cases-classification-tutorial (2,464 rows, 13 specialties).
@@ -575,16 +604,25 @@ Same naming convention as `med-expert-match-ce`:
 
 ## 14. Milestones
 
-| # | Milestone | Key deliverables | Status |
+Implementation milestones with aligned test deliverables ([TESTING.md §10](TESTING.md#10-mapping-to-milestones)).
+
+| # | Milestone | Key deliverables | Tests | Status |
+|---|---|---|---|---|
+| M1 | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, Boot stub | `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` | ⬜ |
+| M2 | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | `DatasetLoaderIntegrationTest` (train CSV sample) | ⬜ |
+| M3 | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats | Repository IT, `FtsRetrievalQualityTest` (subset) | ⬜ |
+| M4 | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2 | Embedding IT, `SemanticRetrievalQualityTest` | ⬜ |
+| M5 | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt | `McpToolsContractIntegrationTest`, `McpResourcesIntegrationTest` | ⬜ |
+| M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.*` properties | Config binding tests, cache TTL test | ⬜ |
+| M7 | End-to-end | Claude Desktop smoke, `McpSyncClient` from med-expert-match-ce | E2E smoke checklist ([TESTING.md §11](TESTING.md#11-manual-smoke-checklist-m7)) | ⬜ |
+| M8 | Docker + docs | `docker-compose.yml`, full doc set (`README`, `USE_CASES`, `TESTING`) | Docker health + nightly **test** split quality gate | ⬜ |
+
+### Optional (future)
+
+| # | Milestone | Key deliverables | Reference |
 |---|---|---|---|
-| M1 | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, `ModulithArchitectureTest`, Boot stub | ⬜ |
-| M2 | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | ⬜ |
-| M3 | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats query | ⬜ |
-| M4 | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2, Testcontainers IT | ⬜ |
-| M5 | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt — interface injection only | ⬜ |
-| M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.embedding.multi-endpoint` + `medicalmcp.*` properties | ⬜ |
-| M7 | End-to-end | Claude Desktop smoke test, `McpSyncClient` call from `med-expert-match-ce` | ⬜ |
-| M8 | Docker + docs | `docker-compose.yml`, `README.md`, startup guide | ⬜ |
+| M9 | Prompt lab | `promptlab` module, meta-prompting, eval tools (`prompt-lab` profile) | [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md), [§18](#18-future-scope-optional) |
+| M10 | Prompt integration | Wire promoted template into `case-analysis` | [PROMPT_IMPROVEMENT.md §9](PROMPT_IMPROVEMENT.md#9-implementation-phases) P6 |
 
 ---
 
@@ -654,7 +692,60 @@ Ollama runs on the host (`host.docker.internal:11434`), not in Docker.
 
 ---
 
+## 17. Testing & quality assurance
+
+Full strategy: [TESTING.md](TESTING.md). Summary:
+
+### Test pyramid
+
+| Layer | Profile | When |
+|---|---|---|
+| Unit + Modulith | default | Every `mvn test` |
+| Integration (Testcontainers) | `integration` | Every PR — `mvn verify -Pintegration` |
+| Response quality (test split) | `quality` | Nightly / pre-release |
+| E2E MCP client | `e2e` | Manual / staging |
+
+### Dataset splits in tests
+
+| Split | CSV | Role |
+|---|---|---|
+| train (1,724) | [medical_cases_train.csv](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_train.csv) | Fixtures, fast IT |
+| validation (370) | [medical_cases_validation.csv](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_validation.csv) | Threshold tuning only |
+| test (370) | [medical_cases_test.csv](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_test.csv) | **Held-out quality gates** |
+
+### Response quality metrics (production MCP)
+
+| Tool | Key metrics | Initial test-split gates (TESTING.md) |
+|---|---|---|
+| `search_cases` | Hit@10, Specialty@10, MRR | sample_name Hit@10 ≥ 0.95 |
+| `semantic_search` | Self@1, Self@5, Specialty@5 | Self@5 ≥ 0.65, Specialty@5 ≥ 0.85 |
+| `get_case` / stats | Round-trip fidelity, exact counts | 2464 rows, 13 specialties |
+| Filters | Specialty/split precision | 100 % on filtered results |
+
+Quality CI emits `target/quality-report.json`; build fails when gates are missed.
+
+---
+
+## 18. Future scope (optional)
+
+Not required for M1–M8. Documented in [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md).
+
+**`prompt-lab` Spring profile** (`medicalmcp.prompt-lab.enabled=true`):
+
+- Optional `promptlab` Modulith module — depends on `medicalcase`, `retrieval`; not depended on by production `mcp`
+- Ports [specialty-classification-reasoning](https://github.com/berdachuk/ai-architect-6-tasks/tree/main/specialty-classification-reasoning) patterns: ReAct prompts, meta-improvement with failure context, label normalization to 13 HF specialties
+- MCP tools (lab only): `evaluate_specialty_prompt`, `improve_specialty_prompt`, `compare_specialty_prompts`, `gate_specialty_prompt`
+- Eval on **validation** split; promote only if **test** split gate passes
+- Milestones: **M9** (prompt lab), **M10** (optional `case-analysis` template wiring)
+
+Default production server: **5 tools, 2 resources, 1 prompt, 0 completions** — unchanged.
+
+---
+
 ## Related documentation
 
 - [docs/README.md](README.md) — documentation index
 - [PLAN.md](PLAN.md) — architecture, class-level design, implementation milestones
+- [USE_CASES.md](USE_CASES.md) — actors, workflows, per-tool scenarios
+- [TESTING.md](TESTING.md) — test strategy and response quality benchmarks
+- [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) — auto LLM prompt improvement proposal (optional `prompt-lab` profile)

@@ -7,10 +7,13 @@ Spring AI 2.0 MCP server that wraps the [hpe-ai/medical-cases-classification-tut
 | Document | Description |
 |---|---|
 | [docs/README.md](docs/README.md) | Documentation index |
-| [docs/PRD.md](docs/PRD.md) | Product requirements, MCP surface, NFRs, configuration |
+| [docs/TESTING.md](docs/TESTING.md) | Test strategy, quality benchmarks on test split |
+| [docs/USE_CASES.md](docs/USE_CASES.md) | Actors, workflows, and per-tool use case catalog |
+| [docs/PROMPT_IMPROVEMENT.md](docs/PROMPT_IMPROVEMENT.md) | Optional prompt-lab (M9/M10) — see PRD §18 |
+| [docs/PRD.md](docs/PRD.md) | Product requirements (source of truth) |
 | [docs/PLAN.md](docs/PLAN.md) | Architecture, class design, implementation milestones |
 
-**Version:** 1.5.0
+**Version:** 1.6.0
 
 ## Dataset (verified 2026-06-16)
 

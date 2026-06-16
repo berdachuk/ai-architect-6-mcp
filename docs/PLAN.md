@@ -1,7 +1,7 @@
 # Architecture & Implementation Plan
 ## `medical-mcp-server` — HuggingFace Dataset Wrapper
 
-**Version:** 1.5.0  
+**Version:** 1.6.0  
 **Date:** 2026-06-16  
 **Requirements:** [PRD.md](PRD.md)  
 **Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)  
@@ -671,7 +671,7 @@ spring:
     mcp:
       server:
         name: medical-mcp-server
-        version: 1.5.0
+        version: 1.6.0
         type: SYNC
         instructions: >
           Wraps the hpe-ai/medical-cases-classification-tutorial dataset (2,464 rows, 13 specialties).
@@ -875,16 +875,20 @@ spring:
 
 ## Milestones
 
-| # | Milestone | Key deliverables | Status |
-|---|---|---|---|
-| **M1** | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, `ModulithArchitectureTest`, Boot stub | ⬜ |
-| **M2** | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | ⬜ |
-| **M3** | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats | ⬜ |
-| **M4** | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2, Testcontainers IT | ⬜ |
-| **M5** | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt — interface injection only | ⬜ |
-| **M6** | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.embedding.multi-endpoint` + `medicalmcp.*` properties | ⬜ |
-| **M7** | End-to-end | Claude Desktop smoke test, `McpSyncClient` call from `med-expert-match-ce` | ⬜ |
-| **M8** | Docker + docs | `docker-compose.yml`, `README.md`, startup guide | ⬜ |
+Aligned with [PRD.md §14](PRD.md#14-milestones) and [TESTING.md §10](TESTING.md#10-mapping-to-milestones).
+
+| # | Milestone | Key deliverables | Tests | Status |
+|---|---|---|---|---|
+| **M1** | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, Boot stub | `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` | ⬜ |
+| **M2** | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | `DatasetLoaderIntegrationTest` (train CSV sample) | ⬜ |
+| **M3** | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats | Repository IT, `FtsRetrievalQualityTest` (subset) | ⬜ |
+| **M4** | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2 | Embedding IT, `SemanticRetrievalQualityTest` | ⬜ |
+| **M5** | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt | `McpToolsContractIntegrationTest`, `McpResourcesIntegrationTest` | ⬜ |
+| **M6** | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.*` properties | Config binding, cache TTL | ⬜ |
+| **M7** | End-to-end | Claude Desktop smoke, `McpSyncClient` from med-expert-match-ce | E2E smoke checklist | ⬜ |
+| **M8** | Docker + docs | `docker-compose.yml`, full doc set | Nightly test-split quality gate | ⬜ |
+
+**Optional (future):** M9 prompt-lab, M10 prompt integration — [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md), [PRD §18](PRD.md#18-future-scope-optional).
 
 ---
 
@@ -917,3 +921,12 @@ spring:
 | `SemanticMatch` | `semantic_search` — `{ caseSummary: CaseSummary, similarity }` |
 | `SpecialtyCount` | `list_specialties` |
 | `DatasetStats` | `get_dataset_stats`, `medical://stats` resource |
+
+---
+
+## Related documentation
+
+- [PRD.md](PRD.md) — requirements source of truth
+- [USE_CASES.md](USE_CASES.md) — use case catalog
+- [TESTING.md](TESTING.md) — test strategy and quality gates
+- [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) — optional prompt-lab (M9/M10)
