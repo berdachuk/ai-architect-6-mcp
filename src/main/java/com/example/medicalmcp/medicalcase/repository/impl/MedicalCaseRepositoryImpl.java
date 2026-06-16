@@ -1,7 +1,9 @@
 package com.example.medicalmcp.medicalcase.repository.impl;
 
+import com.example.medicalmcp.core.repository.sql.InjectSql;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.example.medicalmcp.medicalcase.domain.SemanticMatch;
 import com.example.medicalmcp.medicalcase.domain.SpecialtyCount;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import java.sql.ResultSet;
@@ -25,47 +27,32 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
 
     private static final Set<String> VALID_SPLITS = Set.of("train", "validation", "test");
 
-    private static final String INSERT_SQL =
-            """
-            INSERT INTO medical_case (
-                id, sample_name, description, transcription, medical_specialty, keywords, split, created_at
-            ) VALUES (
-                :id, :sampleName, :description, :transcription, :medicalSpecialty, :keywords, :split, :createdAt
-            )
-            """;
+    @InjectSql("/sql/medicalcase/insert.sql")
+    private String insertSql;
 
-    private static final String SELECT_BY_ID =
-            """
-            SELECT id, sample_name, description, transcription, medical_specialty, keywords, split, created_at
-            FROM medical_case
-            WHERE id = :id
-            """;
+    @InjectSql("/sql/medicalcase/selectById.sql")
+    private String selectByIdSql;
 
-    private static final String FTS_SEARCH_BASE =
-            """
-            SELECT id, sample_name, description, medical_specialty, keywords, split
-            FROM medical_case
-            WHERE fts @@ plainto_tsquery('english', :query)
-            """;
+    @InjectSql("/sql/medicalcase/countAll.sql")
+    private String countAllSql;
 
-    private static final String LIST_SPECIALTIES =
-            """
-            SELECT medical_specialty, COUNT(*) AS case_count
-            FROM medical_case
-            WHERE medical_specialty IS NOT NULL
-            GROUP BY medical_specialty
-            ORDER BY medical_specialty
-            """;
+    @InjectSql("/sql/medicalcase/fullTextSearch.sql")
+    private String fullTextSearchSql;
 
-    private static final String COUNT_BY_SPLIT =
-            """
-            SELECT split, COUNT(*) AS case_count
-            FROM medical_case
-            WHERE split IS NOT NULL
-            GROUP BY split
-            """;
+    @InjectSql("/sql/medicalcase/listSpecialties.sql")
+    private String listSpecialtiesSql;
 
-    private static final String COUNT_ALL = "SELECT COUNT(*) FROM medical_case";
+    @InjectSql("/sql/medicalcase/countBySplit.sql")
+    private String countBySplitSql;
+
+    @InjectSql("/sql/medicalcase/findWithoutEmbeddings.sql")
+    private String findWithoutEmbeddingsSql;
+
+    @InjectSql("/sql/medicalcase/updateEmbedding.sql")
+    private String updateEmbeddingSql;
+
+    @InjectSql("/sql/medicalcase/semanticSearch.sql")
+    private String semanticSearchSql;
 
     private final NamedParameterJdbcTemplate jdbc;
 
@@ -76,7 +63,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     @Override
     public Optional<MedicalCase> findById(UUID id) {
         List<MedicalCase> rows =
-                jdbc.query(SELECT_BY_ID, Map.of("id", id), (rs, rowNum) -> mapMedicalCase(rs));
+                jdbc.query(selectByIdSql, Map.of("id", id), (rs, rowNum) -> mapMedicalCase(rs));
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.getFirst());
     }
 
@@ -89,32 +76,26 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
             return List.of();
         }
 
-        StringBuilder sql = new StringBuilder(FTS_SEARCH_BASE);
-        MapSqlParameterSource params = new MapSqlParameterSource("query", query.trim());
-        if (StringUtils.hasText(specialty)) {
-            sql.append(" AND medical_specialty = :specialty");
-            params.addValue("specialty", specialty);
-        }
-        if (StringUtils.hasText(split)) {
-            sql.append(" AND split = :split");
-            params.addValue("split", split);
-        }
-        sql.append(" ORDER BY ts_rank(fts, plainto_tsquery('english', :query)) DESC LIMIT :limit");
-        params.addValue("limit", limit);
-
-        return jdbc.query(sql.toString(), params, (rs, rowNum) -> mapCaseSummary(rs));
+        return jdbc.query(
+                fullTextSearchSql,
+                new MapSqlParameterSource()
+                        .addValue("query", query.trim())
+                        .addValue("specialty", StringUtils.hasText(specialty) ? specialty : "")
+                        .addValue("split", StringUtils.hasText(split) ? split : "")
+                        .addValue("limit", limit),
+                (rs, rowNum) -> mapCaseSummary(rs));
     }
 
     @Override
     public List<SpecialtyCount> listSpecialties() {
-        return jdbc.query(LIST_SPECIALTIES, Map.of(), (rs, rowNum) -> new SpecialtyCount(
+        return jdbc.query(listSpecialtiesSql, Map.of(), (rs, rowNum) -> new SpecialtyCount(
                 rs.getString("medical_specialty"), rs.getLong("case_count")));
     }
 
     @Override
     public Map<String, Long> countBySplit() {
         Map<String, Long> counts = new HashMap<>();
-        jdbc.query(COUNT_BY_SPLIT, Map.of(), rs -> {
+        jdbc.query(countBySplitSql, Map.of(), rs -> {
             counts.put(rs.getString("split"), rs.getLong("case_count"));
         });
         return Map.copyOf(counts);
@@ -122,7 +103,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
 
     @Override
     public long countAll() {
-        Long count = jdbc.getJdbcTemplate().queryForObject(COUNT_ALL, Long.class);
+        Long count = jdbc.getJdbcTemplate().queryForObject(countAllSql, Long.class);
         return count == null ? 0L : count;
     }
 
@@ -133,12 +114,41 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
         }
         SqlParameterSource[] batch =
                 cases.stream().map(this::toInsertParams).toArray(SqlParameterSource[]::new);
-        jdbc.batchUpdate(INSERT_SQL, batch);
+        jdbc.batchUpdate(insertSql, batch);
+    }
+
+    @Override
+    public List<MedicalCase> findWithoutEmbeddings() {
+        return jdbc.query(findWithoutEmbeddingsSql, Map.of(), (rs, rowNum) -> mapMedicalCase(rs));
+    }
+
+    @Override
+    public List<SemanticMatch> semanticSearch(
+            float[] queryEmbedding, String specialty, int topK, double minSimilarity) {
+        if (queryEmbedding == null || queryEmbedding.length == 0 || topK <= 0) {
+            return List.of();
+        }
+        return jdbc.query(
+                semanticSearchSql,
+                new MapSqlParameterSource()
+                        .addValue("embedding", formatVector(queryEmbedding))
+                        .addValue("specialty", StringUtils.hasText(specialty) ? specialty : "")
+                        .addValue("minSimilarity", minSimilarity)
+                        .addValue("topK", topK),
+                (rs, rowNum) -> new SemanticMatch(mapCaseSummary(rs), rs.getDouble("similarity")));
     }
 
     @Override
     public void updateEmbeddingsBatch(Map<UUID, float[]> embeddings) {
-        throw new UnsupportedOperationException("updateEmbeddingsBatch is implemented in milestone M4");
+        if (embeddings.isEmpty()) {
+            return;
+        }
+        SqlParameterSource[] batch = embeddings.entrySet().stream()
+                .map(entry -> new MapSqlParameterSource()
+                        .addValue("id", entry.getKey())
+                        .addValue("embedding", formatVector(entry.getValue())))
+                .toArray(SqlParameterSource[]::new);
+        jdbc.batchUpdate(updateEmbeddingSql, batch);
     }
 
     private SqlParameterSource toInsertParams(MedicalCase medicalCase) {
@@ -151,6 +161,18 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
                 .addValue("keywords", medicalCase.keywords())
                 .addValue("split", medicalCase.split())
                 .addValue("createdAt", Timestamp.from(medicalCase.createdAt()));
+    }
+
+    private static String formatVector(float[] vector) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < vector.length; i++) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(vector[i]);
+        }
+        sb.append(']');
+        return sb.toString();
     }
 
     private static MedicalCase mapMedicalCase(ResultSet rs) throws SQLException {

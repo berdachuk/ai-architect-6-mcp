@@ -1,5 +1,6 @@
 package com.example.medicalmcp.retrieval.service.impl;
 
+import com.example.medicalmcp.embedding.service.EmbeddingService;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.SemanticMatch;
@@ -17,14 +18,19 @@ import org.springframework.stereotype.Service;
 public class VectorSearchServiceImpl implements VectorSearchService {
 
     private static final int DEFAULT_LIMIT = 10;
+    private static final int DEFAULT_TOP_K = 5;
+    private static final double DEFAULT_MIN_SIMILARITY = 0.70;
 
     private final MedicalCaseRepository repository;
+    private final EmbeddingService embeddingService;
     private final int maxLimit;
 
     public VectorSearchServiceImpl(
             MedicalCaseRepository repository,
+            EmbeddingService embeddingService,
             @Value("${medicalmcp.retrieval.max-limit:50}") int maxLimit) {
         this.repository = repository;
+        this.embeddingService = embeddingService;
         this.maxLimit = maxLimit;
     }
 
@@ -50,6 +56,9 @@ public class VectorSearchServiceImpl implements VectorSearchService {
     @Override
     public List<SemanticMatch> semanticSearch(
             String query, String specialty, Integer topK, Double minSimilarity) {
-        throw new UnsupportedOperationException("semanticSearch is implemented in milestone M4");
+        int effectiveTopK = topK == null ? DEFAULT_TOP_K : Math.min(Math.max(topK, 1), maxLimit);
+        double effectiveMin = minSimilarity == null ? DEFAULT_MIN_SIMILARITY : minSimilarity;
+        float[] queryEmbedding = embeddingService.embedAsFloatArray(query);
+        return repository.semanticSearch(queryEmbedding, specialty, effectiveTopK, effectiveMin);
     }
 }

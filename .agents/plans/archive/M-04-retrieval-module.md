@@ -13,6 +13,8 @@
 | `RetrievalCacheConfig` — Caffeine 60s stats cache | ✅ |
 | Integration tests + FTS quality subset | ✅ |
 | Singleton Testcontainers Postgres | ✅ |
+| Inline SQL in repository impl | ✅ (migrate in M-05 per [DEC-010](../memory-bank/decisions.md#dec-010--external-sql-files-with-injectsql), [DEC-011](../memory-bank/decisions.md#dec-011--named-bind-variables-in-sql)) |
+| Dynamic SQL `StringBuilder` for FTS filters | ✅ (replace with single `fullTextSearch.sql` + `COALESCE(:param,'')` optional filters in M-05) |
 
 ## Verification
 
@@ -21,4 +23,4 @@
 
 ## Next
 
-[M-05 embedding module](M-05-embedding-module.md) (requirements M4).
+[M-05 embedding module](../M-05-embedding-module.md) (requirements M4).

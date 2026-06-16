@@ -38,12 +38,18 @@
 - Singleton Testcontainers Postgres for stable WSL/Docker IT
 - **REQ-006** · plan archived: `M-04-retrieval-module.md`
 
+## 2026-06-16 — M4 Embedding module
+
+- `@InjectSql`, SQL files, `EmbeddingEndpointPool`, `EmbeddingService`, loader pass 2
+- `semanticSearch` via pgvector; `SemanticRetrievalQualityIntegrationTest` subset
+- **REQ-004, REQ-006, DEC-010, DEC-011** · plan archived: `M-05-embedding-module.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M3 | ✅ Complete |
-| M4–M8 | ⬜ Not started |
+| M1–M4 | ✅ Complete |
+| M5–M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

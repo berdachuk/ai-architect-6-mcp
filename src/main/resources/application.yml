@@ -1,6 +1,16 @@
 spring:
   application:
     name: medical-mcp-server
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+  ai:
+    openai:
+      enabled: false
+    custom:
+      embedding:
+        api-key: ${EMBEDDING_API_KEY:none}
+        dimensions: ${EMBEDDING_DIMENSIONS:768}
   datasource:
     url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5432/${MEDICALMCP_DB_NAME:medical_mcp}
     username: ${MEDICALMCP_DB_USERNAME:medical_mcp}
@@ -19,6 +29,15 @@ server:
 medicalmcp:
   retrieval:
     max-limit: ${MEDICALMCP_RETRIEVAL_MAX_LIMIT:50}
+  embedding:
+    multi-endpoint:
+      skip-duration-min: ${MEDICALMCP_EMBEDDING_SKIP_DURATION_MIN:10}
+      worker-per-endpoint: ${MEDICALMCP_EMBEDDING_WORKERS:1}
+      api-batch-size: ${MEDICALMCP_EMBEDDING_API_BATCH_SIZE:50}
+      endpoints:
+        - url: ${EMBEDDING_BASE_URL:http://localhost:11434}
+          model: ${EMBEDDING_MODEL:nomic-embed-text:v1.5}
+          priority: 0
   dataset:
     loader:
       enabled: ${MEDICALMCP_DATASET_LOADER_ENABLED:false}

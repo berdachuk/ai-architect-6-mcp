@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.medicalmcp.embedding.service.EmbeddingService;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import java.util.List;
@@ -16,7 +17,8 @@ class VectorSearchServiceImplTest {
     @Test
     void searchCasesUsesDefaultLimitWhenNull() {
         MedicalCaseRepository repository = mock(MedicalCaseRepository.class);
-        VectorSearchServiceImpl service = new VectorSearchServiceImpl(repository, 50);
+        EmbeddingService embeddingService = mock(EmbeddingService.class);
+        VectorSearchServiceImpl service = new VectorSearchServiceImpl(repository, embeddingService, 50);
         when(repository.fullTextSearch("pacemaker", null, null, 10)).thenReturn(List.of());
 
         service.searchCases("pacemaker", null, null, null);
@@ -27,7 +29,8 @@ class VectorSearchServiceImplTest {
     @Test
     void searchCasesClampsLimitToMax() {
         MedicalCaseRepository repository = mock(MedicalCaseRepository.class);
-        VectorSearchServiceImpl service = new VectorSearchServiceImpl(repository, 50);
+        EmbeddingService embeddingService = mock(EmbeddingService.class);
+        VectorSearchServiceImpl service = new VectorSearchServiceImpl(repository, embeddingService, 50);
         when(repository.fullTextSearch("pacemaker", null, null, 50))
                 .thenReturn(List.of(new CaseSummary(UUID.randomUUID(), "x", "y", "z", "k", "train")));
 
