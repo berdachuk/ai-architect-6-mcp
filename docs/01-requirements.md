@@ -1,22 +1,25 @@
-# Product Requirements Document
-## Medical MCP Server (`medical-mcp-server`)
+# Requirements
 
-**Version:** 1.6.0  
+## Medical MCP Server (`medical-mcp-server`) — SRS
+
+**Version:** 2.0.0  
 **Date:** 2026-06-16  
 **Author:** Siarhei Berdachuk  
 **Status:** Draft  
-**Implementation plan:** [PLAN.md](PLAN.md)  
+**Doc index:** [README.md](README.md)  
 **Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)
 
-### Documentation index
+### Related documents
 
-| Document | Purpose |
-|---|---|
-| [README.md](README.md) | Documentation index |
-| [PLAN.md](PLAN.md) | Architecture, class design, milestones |
-| [USE_CASES.md](USE_CASES.md) | Actors, workflows, per-tool scenarios |
-| [TESTING.md](TESTING.md) | Test pyramid, response quality on test split |
-| [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) | Future: optional `prompt-lab` profile — PRD §18, M9/M10 |
+| # | Document | Purpose |
+|---|---|---|
+| | [README.md](README.md) | Documentation index and development pipeline |
+| 1 | [02-architecture.md](02-architecture.md) | System diagram, Modulith modules, stack, design decisions |
+| 2 | [03-design.md](03-design.md) | Schema, services, MCP class sketches |
+| 3 | [04-testing.md](04-testing.md) | Test pyramid, quality gates, split usage |
+| 4 | [05-deployment.md](05-deployment.md) | Config, Docker, MCP clients |
+| | [use-cases.md](use-cases.md) | Actors, workflows, per-tool scenarios |
+| | [future/prompt-lab.md](future/prompt-lab.md) | Optional `prompt-lab` profile — §18, M9/M10 |
 
 ---
 
@@ -109,8 +112,8 @@ Verified via [HuggingFace Datasets API](https://datasets-server.huggingface.co/i
 - Be consumable by Claude Desktop and `McpSyncClient` inside `med-expert-match-ce`
 - Use **Spring Modulith** package modules with explicit `allowedDependencies` (same approach as [`med-expert-match-ce`](https://github.com/berdachuk/med-expert-match-ce))
 - Enforce **interface / implementation separation** — public contracts in `service/` and `repository/`; JDBC and framework code only in `impl/` subpackages
-- Verify **retrieval response quality** on the held-out **test** split (FTS + semantic metrics — see [TESTING.md](TESTING.md))
-- Maintain a **use case catalog** aligned with dataset fields ([USE_CASES.md](USE_CASES.md))
+- Verify **retrieval response quality** on the held-out **test** split (FTS + semantic metrics — see [04-testing.md](04-testing.md))
+- Maintain a **use case catalog** aligned with dataset fields ([use-cases.md](use-cases.md))
 
 ### Non-Goals
 
@@ -363,7 +366,7 @@ medicalmcp:
 | JDBC only | No JPA/Hibernate — `NamedParameterJdbcTemplate` throughout |
 | Embedding pool | `medicalmcp.embedding.multi-endpoint.endpoints` must contain ≥1 valid URL; fail fast at startup |
 | Modularity | `ApplicationModules.of(...).verify()` passes — no illegal cross-module references |
-| Retrieval quality | FTS + semantic benchmarks on **test** split meet gates in [TESTING.md](TESTING.md) §6 |
+| Retrieval quality | FTS + semantic benchmarks on **test** split meet gates in [04-testing.md](04-testing.md) §6 |
 
 ### Domain records (`medicalcase/domain`)
 
@@ -378,6 +381,8 @@ medicalmcp:
 ---
 
 ## 9. Architecture (Spring Modulith)
+
+**Canonical reference:** [02-architecture.md](02-architecture.md) — diagram, full package tree, stack versions, design decisions.
 
 Single deployable Spring Boot application using **package-based modules** ([`med-expert-match-ce` pattern](https://github.com/berdachuk/med-expert-match-ce)). Each module has a `package-info.java` annotated with `@ApplicationModule(allowedDependencies = …)` declaring its dependency graph. Modulith verification runs in CI (`mvn verify`).
 
@@ -424,62 +429,13 @@ system       → core, embedding
 
 ## 10. Project Layout
 
-```
-medical-mcp-server/
-├── pom.xml                          # Single module; Spring Modulith + Spring AI BOM
-├── docker-compose.yml
-├── Dockerfile
-└── src/
-    ├── main/
-    │   ├── java/com/example/medicalmcp/
-    │   │   ├── MedicalMcpApplication.java
-    │   │   ├── core/                # SecurityConfig, shared @Configuration
-    │   │   ├── medicalcase/
-    │   │   │   ├── domain/          # MedicalCase, CaseSummary, SemanticMatch, …
-    │   │   │   ├── repository/
-    │   │   │   ├── repository/impl/
-    │   │   │   └── package-info.java
-    │   │   ├── embedding/
-    │   │   │   ├── service/
-    │   │   │   ├── service/impl/
-    │   │   │   ├── multiendpoint/
-    │   │   │   ├── config/
-    │   │   │   └── package-info.java
-    │   │   ├── retrieval/
-    │   │   ├── dataset/
-    │   │   ├── mcp/
-    │   │   └── system/              # EmbeddingPoolHealthIndicator (optional)
-    │   └── resources/
-    │       ├── application.yml
-    │       ├── db/migration/        # V1__init_medical_cases.sql
-    │       └── sql/                 # optional per-module SQL (@InjectSql)
-    └── test/java/com/example/medicalmcp/
-        ├── ModulithArchitectureTest.java
-        ├── integration/                   # Testcontainers — see TESTING.md
-        └── quality/                       # test-split benchmarks — see TESTING.md
-```
+See [02-architecture.md — Module Structure](02-architecture.md#module-structure-spring-modulith).
 
 ---
 
 ## 11. Key Dependencies
 
-| Dependency | Version | Notes |
-|---|---|---|
-| Spring Boot | 4.1.0 | Aligned with `med-expert-match-ce` |
-| Spring AI BOM | 2.0.0 | |
-| Spring Modulith BOM | 2.1.0 | Package module boundaries (aligned with med-expert-match-ce) |
-| `spring-modulith-core` | 2.1.0 | `@ApplicationModule`, verification API |
-| `spring-modulith-starter-test` | 2.1.0 | `ApplicationModuleTest` / `verify()` in CI |
-| `spring-ai-starter-mcp-server-webmvc` | 2.0.0 | SSE transport |
-| `spring-ai-openai` | 2.0.0 | Manual `OpenAiEmbeddingModel` in embedding pool (no auto-config) |
-| `postgresql` | 42.7.11 | Aligned with `med-expert-match-ce` |
-| `pgvector` | 0.1.6 | |
-| `flyway-database-postgresql` | 10.x | |
-| `caffeine` | 3.2.4 | Stats cache |
-| `commons-lang3` | 3.20.0 | |
-| `spring-boot-starter-jdbc` | (Boot BOM) | NamedParameterJdbcTemplate |
-| `spring-boot-starter-actuator` | (Boot BOM) | |
-| Testcontainers | 2.0.5 | `pgvector/pgvector:pg17` |
+See [02-architecture.md — Stack & Versions](02-architecture.md#stack--versions).
 
 ---
 
@@ -604,7 +560,7 @@ Same naming convention as `med-expert-match-ce`:
 
 ## 14. Milestones
 
-Implementation milestones with aligned test deliverables ([TESTING.md §10](TESTING.md#10-mapping-to-milestones)).
+Implementation milestones with aligned test deliverables ([04-testing.md §10](04-testing.md#10-mapping-to-milestones)).
 
 | # | Milestone | Key deliverables | Tests | Status |
 |---|---|---|---|---|
@@ -614,15 +570,15 @@ Implementation milestones with aligned test deliverables ([TESTING.md §10](TEST
 | M4 | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2 | Embedding IT, `SemanticRetrievalQualityTest` | ⬜ |
 | M5 | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt | `McpToolsContractIntegrationTest`, `McpResourcesIntegrationTest` | ⬜ |
 | M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.*` properties | Config binding tests, cache TTL test | ⬜ |
-| M7 | End-to-end | Claude Desktop smoke, `McpSyncClient` from med-expert-match-ce | E2E smoke checklist ([TESTING.md §11](TESTING.md#11-manual-smoke-checklist-m7)) | ⬜ |
-| M8 | Docker + docs | `docker-compose.yml`, full doc set (`README`, `USE_CASES`, `TESTING`) | Docker health + nightly **test** split quality gate | ⬜ |
+| M7 | End-to-end | Claude Desktop smoke, `McpSyncClient` from med-expert-match-ce | E2E smoke checklist ([04-testing.md §11](04-testing.md#11-manual-smoke-checklist-m7)) | ⬜ |
+| M8 | Docker + docs | `docker-compose.yml`, full doc set | Docker health + nightly **test** split quality gate | ⬜ |
 
 ### Optional (future)
 
 | # | Milestone | Key deliverables | Reference |
 |---|---|---|---|
-| M9 | Prompt lab | `promptlab` module, meta-prompting, eval tools (`prompt-lab` profile) | [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md), [§18](#18-future-scope-optional) |
-| M10 | Prompt integration | Wire promoted template into `case-analysis` | [PROMPT_IMPROVEMENT.md §9](PROMPT_IMPROVEMENT.md#9-implementation-phases) P6 |
+| M9 | Prompt lab | `promptlab` module, meta-prompting, eval tools (`prompt-lab` profile) | [future/prompt-lab.md](future/prompt-lab.md), [§18](#18-future-scope-optional) |
+| M10 | Prompt integration | Wire promoted template into `case-analysis` | [future/prompt-lab.md §9](future/prompt-lab.md#9-implementation-phases) P6 |
 
 ---
 
@@ -694,7 +650,7 @@ Ollama runs on the host (`host.docker.internal:11434`), not in Docker.
 
 ## 17. Testing & quality assurance
 
-Full strategy: [TESTING.md](TESTING.md). Summary:
+Full strategy: [04-testing.md](04-testing.md). Summary:
 
 ### Test pyramid
 
@@ -715,7 +671,7 @@ Full strategy: [TESTING.md](TESTING.md). Summary:
 
 ### Response quality metrics (production MCP)
 
-| Tool | Key metrics | Initial test-split gates (TESTING.md) |
+| Tool | Key metrics | Initial test-split gates (04-testing.md) |
 |---|---|---|
 | `search_cases` | Hit@10, Specialty@10, MRR | sample_name Hit@10 ≥ 0.95 |
 | `semantic_search` | Self@1, Self@5, Specialty@5 | Self@5 ≥ 0.65, Specialty@5 ≥ 0.85 |
@@ -728,7 +684,7 @@ Quality CI emits `target/quality-report.json`; build fails when gates are missed
 
 ## 18. Future scope (optional)
 
-Not required for M1–M8. Documented in [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md).
+Not required for M1–M8. Documented in [future/prompt-lab.md](future/prompt-lab.md).
 
 **`prompt-lab` Spring profile** (`medicalmcp.prompt-lab.enabled=true`):
 
@@ -744,8 +700,10 @@ Default production server: **5 tools, 2 resources, 1 prompt, 0 completions** —
 
 ## Related documentation
 
-- [docs/README.md](README.md) — documentation index
-- [PLAN.md](PLAN.md) — architecture, class-level design, implementation milestones
-- [USE_CASES.md](USE_CASES.md) — actors, workflows, per-tool scenarios
-- [TESTING.md](TESTING.md) — test strategy and response quality benchmarks
-- [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) — auto LLM prompt improvement proposal (optional `prompt-lab` profile)
+- [README.md](README.md) — documentation index
+- [02-architecture.md](02-architecture.md) — system design, Modulith layout, stack
+- [03-design.md](03-design.md) — detailed design and MCP sketches
+- [04-testing.md](04-testing.md) — test strategy and quality benchmarks
+- [05-deployment.md](05-deployment.md) — config, Docker, MCP clients
+- [use-cases.md](use-cases.md) — actors, workflows, per-tool scenarios
+- [future/prompt-lab.md](future/prompt-lab.md) — optional prompt-lab (M9/M10)

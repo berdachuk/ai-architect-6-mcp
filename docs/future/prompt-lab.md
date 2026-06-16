@@ -1,9 +1,10 @@
-# Proposal: Auto LLM Prompt Improvement
+# Prompt lab (future scope)
+## Auto LLM prompt improvement
 
 **Version:** 1.0 (proposal)  
 **Date:** 2026-06-16  
-**Status:** Future scope — [PRD §18](PRD.md#18-future-scope-optional), milestones M9/M10  
-**Related:** [PRD.md](PRD.md) · [TESTING.md](TESTING.md) · [USE_CASES.md](USE_CASES.md)
+**Status:** Future scope — [Requirements §18](01-requirements.md#18-future-scope-optional), milestones M9/M10  
+**Related:** [01-requirements.md](01-requirements.md) · [04-testing.md](04-testing.md) · [use-cases.md](use-cases.md)
 
 **Reference work analysed:**
 
@@ -21,7 +22,7 @@ This proposal adds an **optional prompt-improvement subsystem** to medical-mcp-s
 1. Reuses the same dataset splits ([train](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_train.csv) / [validation](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_validation.csv) / [test](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_test.csv))
 2. Ports proven patterns from `specialty-classification-reasoning` (evaluator, normalization, meta loop)
 3. Feeds **failure analysis** back into meta-prompting (addressing the report’s +0 % meta delta)
-4. Gates promotion on [TESTING.md](TESTING.md) validation/test methodology
+4. Gates promotion on [04-testing.md](04-testing.md) validation/test methodology
 5. Stays **off the default production MCP surface** — enabled only via `prompt-lab` profile
 
 **Not changing:** medical-mcp-server remains a retrieval wrapper; classification is an **evaluatable agent workflow**, not a new production inference API.
@@ -45,8 +46,8 @@ This proposal adds an **optional prompt-improvement subsystem** to medical-mcp-s
 | Finding | Evidence | Implication for us |
 |---|---|---|
 | Meta-prompting alone insufficient | bad → meta-improved: still 30 % (n=10) | Meta prompt must include **error examples**, label vocabulary, and dataset-specific constraints |
-| Label format mismatch | `obstetrics_and_gynecology` vs `obstetrics_gynecology`, `cardiology` vs `cardiovascular_pulmonary` | Ship `SpecialtyLabelNormalizer` mapped to **exact 13 HF labels** (see PRD §2) |
-| Small sample noise | limit=10 swings rankings | Use **validation** for tuning, **test** for gate (see TESTING.md) |
+| Label format mismatch | `obstetrics_and_gynecology` vs `obstetrics_gynecology`, `cardiology` vs `cardiovascular_pulmonary` | Ship `SpecialtyLabelNormalizer` mapped to **exact 13 HF labels** (see Requirements §2) |
+| Small sample noise | limit=10 swings rankings | Use **validation** for tuning, **test** for gate (see 04-testing.md) |
 | Train-only eval in CLI | default `medical_cases_train.csv` | Align with our split discipline |
 
 ### 2.3 Code patterns to port
@@ -168,7 +169,7 @@ User:
 {currentPrompt}
 
 ## Allowed labels (exactly 13 — snake_case output)
-{list from list_specialties / PRD §2}
+{list from list_specialties / Requirements §2}
 
 ## Validation accuracy
 {accuracy}% ({correct}/{total})
@@ -240,7 +241,7 @@ ent_otolaryngology       → "ENT - Otolaryngology"
 
 ---
 
-## 7. Evaluation methodology (aligned with TESTING.md)
+## 7. Evaluation methodology (aligned with 04-testing.md)
 
 | Phase | Split | CSV | Purpose |
 |---|---|---|---|
@@ -266,7 +267,7 @@ target/prompt-lab/eval_{templateId}_{timestamp}.json
 
 ### Integration with quality CI
 
-Extend [TESTING.md](TESTING.md) profile `quality`:
+Extend [04-testing.md](04-testing.md) profile `quality`:
 
 ```bash
 mvn verify -Pquality -Pprompt-lab
@@ -289,7 +290,7 @@ Port and adapt variants from [`prompts.ts`](https://github.com/berdachuk/ai-arch
 
 **Adaptations for medical-mcp-server:**
 
-1. Replace generic specialty list with **exact 13 HF labels** from PRD §2
+1. Replace generic specialty list with **exact 13 HF labels** from Requirements §2
 2. Add line: *“Use only retrieval context if provided; base decision on case text below.”*
 3. Optional: inject top-3 `semantic_search` results as context (med-expert-match-ce pattern)
 
@@ -301,12 +302,12 @@ Seed SQL or classpath `promptlab/templates/*.md` on first run.
 
 | Phase | Deliverable | Milestone |
 |---|---|---|
-| **P1** | `SpecialtyLabelNormalizer`, `PromptTemplate` domain, JDBC table `prompt_template` | PRD M9 |
-| **P2** | `SpecialtyClassificationEvaluator` (chat client, parse label, summary) | PRD M9 |
-| **P3** | `MetaPromptImprovementService` with failure-context meta prompt | PRD M9 |
-| **P4** | `PromptLabTools` MCP + `application-prompt-lab.yml` | PRD M9 |
-| **P5** | `PromptLabGateTest` on test CSV; CI nightly | TESTING.md + PRD M9 |
-| **P6** | Optional: wire best template into `case-analysis` as `focus=specialty` hint | PRD M10 |
+| **P1** | `SpecialtyLabelNormalizer`, `PromptTemplate` domain, JDBC table `prompt_template` | Requirements M9 |
+| **P2** | `SpecialtyClassificationEvaluator` (chat client, parse label, summary) | Requirements M9 |
+| **P3** | `MetaPromptImprovementService` with failure-context meta prompt | Requirements M9 |
+| **P4** | `PromptLabTools` MCP + `application-prompt-lab.yml` | Requirements M9 |
+| **P5** | `PromptLabGateTest` on test CSV; CI nightly | 04-testing.md + Requirements M9 |
+| **P6** | Optional: wire best template into `case-analysis` as `focus=specialty` hint | Requirements M10 |
 
 **Chat model wiring:** Separate from embedding pool — use `spring.ai.ollama.chat` or OpenAI-compatible chat client (same Ollama host, different model e.g. `qwen3.5:cloud` per report).
 
@@ -351,7 +352,7 @@ Seed SQL or classpath `promptlab/templates/*.md` on first run.
 | Scope creep into production classifier | `prompt-lab` profile off by default; not a patient-facing endpoint |
 | LLM non-determinism | `temperature=0` for eval; seed + store full `modelOutput` in JSON |
 | Cost / latency | limit N; async batch; cache case text embeddings separately from chat |
-| Conflicts with PRD non-goals | Document as **evaluation/lab** tooling, not “server classifies patients” |
+| Conflicts with Requirements non-goals | Document as **evaluation/lab** tooling, not “server classifies patients” |
 
 ---
 
@@ -378,7 +379,8 @@ Seed SQL or classpath `promptlab/templates/*.md` on first run.
 
 ## 14. Related documentation
 
-- [USE_CASES.md](USE_CASES.md) — retrieval workflows (unchanged for production)
-- [TESTING.md](TESTING.md) — split discipline and quality gates
+- [../use-cases.md](../use-cases.md) — retrieval workflows (unchanged for production)
+- [../04-testing.md](../04-testing.md) — split discipline and quality gates
+- [../01-requirements.md §18](../01-requirements.md#18-future-scope-optional) — future scope and milestones M9/M10
 - [PRACTICAL_TASK_REPORT.md](https://github.com/berdachuk/ai-architect-6-tasks/blob/main/specialty-classification-reasoning/PRACTICAL_TASK_REPORT.md) — empirical prompt rankings
 - [specialty-classification-reasoning README](https://github.com/berdachuk/ai-architect-6-tasks/tree/main/specialty-classification-reasoning) — CLI reference implementation

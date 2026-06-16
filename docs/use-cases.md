@@ -1,8 +1,10 @@
-# Use Cases — `medical-mcp-server`
+# Use cases
 
-**Version:** 1.6.0  
+## `medical-mcp-server`
+
+**Version:** 2.0.0  
 **Date:** 2026-06-16  
-**Requirements:** [PRD.md](PRD.md) · [PLAN.md](PLAN.md)  
+**Related:** [01-requirements.md](01-requirements.md) · [02-architecture.md](02-architecture.md) · [03-design.md](03-design.md)  
 **Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)
 
 This document lists **all supported use cases** for the MCP server. Each maps to dataset fields or server-derived indexes (FTS, embeddings, UUID, split). Clinical inference beyond stored text is out of scope.
@@ -265,7 +267,7 @@ Each specialty supports the same tool pattern with `specialty="<exact label>"`:
 
 ## Explicitly out of scope
 
-These are **not** supported use cases (see PRD non-goals):
+These are **not** supported use cases (see [requirements §3 non-goals](01-requirements.md#3-goals--non-goals)):
 
 | Request | Why not |
 |---|---|
@@ -297,7 +299,8 @@ These are **not** supported use cases (see PRD non-goals):
 
 ## Related documentation
 
-- [PRD.md §6 — MCP Surface](PRD.md#6-mcp-surface)
-- [PRD.md §2 — Dataset schema](PRD.md#2-source-dataset)
-- [PRD.md §14](PRD.md#14-milestones) — milestones with test deliverables
-- [PRD.md §17](PRD.md#17-testing--quality-assurance) — testing summary
+- [01-requirements.md §6 — MCP Surface](01-requirements.md#6-mcp-surface)
+- [01-requirements.md §2 — Dataset schema](01-requirements.md#2-source-dataset)
+- [01-requirements.md §14](01-requirements.md#14-milestones) — milestones with test deliverables
+- [01-requirements.md §17](01-requirements.md#17-testing--quality-assurance) — testing summary
+- [03-design.md](03-design.md) — MCP tools and service sketches

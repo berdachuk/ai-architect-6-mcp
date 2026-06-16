@@ -1,8 +1,8 @@
 # Testing Strategy — `medical-mcp-server`
 
-**Version:** 1.6.0  
+**Version:** 2.0.0  
 **Date:** 2026-06-16  
-**Related:** [PRD.md](PRD.md) · [PLAN.md](PLAN.md) · [USE_CASES.md](USE_CASES.md)  
+**Related:** [01-requirements.md](01-requirements.md) · [README.md](README.md) · [use-cases.md](use-cases.md)  
 **Dataset splits:** [train CSV](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_train.csv) · [validation CSV](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_validation.csv) · [test CSV](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/blob/main/medical_cases_test.csv)
 
 This document proposes how to test the microservice: correctness, MCP contract compliance, performance (NFRs), and **response quality** of search/retrieval tools using the HuggingFace pre-split dataset.
@@ -15,7 +15,7 @@ This document proposes how to test the microservice: correctness, MCP contract c
 |---|---|
 | **Correctness** | Tool responses match DB state and dataset schema |
 | **Contract** | MCP tool/resource/prompt shapes stable for clients |
-| **Performance** | p99 latencies from PRD §8 |
+| **Performance** | p99 latencies from requirements §8 |
 | **Retrieval quality** | FTS and semantic search return relevant cases on held-out **test** split |
 | **Regression** | Quality metrics tracked in CI/nightly; thresholds fail the build |
 
@@ -181,7 +181,7 @@ Invoke tools via Spring test context (direct bean call) or `McpSyncClient` again
 | `search_cases` | Array of objects with `id`, `sampleName`, `description`, `medicalSpecialty`, `keywords`, `split`; no `transcription` |
 | `get_case` | All HF fields + `id`, `split`, `createdAt`; `transcription` non-null |
 | `semantic_search` | `caseSummary` + `similarity` in [0,1]; ordered by similarity desc |
-| `list_specialties` | Exactly 13 entries; labels match PRD §2 table |
+| `list_specialties` | Exactly 13 entries; labels match requirements §2 table |
 | `get_dataset_stats` | `totalCases`, `bySpecialty`, `bySplit` keys |
 
 **Negative cases:**
@@ -307,7 +307,7 @@ For `split` ∈ {`train`, `validation`, `test`}:
 **Class:** `McpLatencyIntegrationTest`  
 **Data:** loaded test subset, warm JVM
 
-| Tool | p99 target (PRD) | Test approach |
+| Tool | p99 target (requirements) | Test approach |
 |---|---|---|
 | `search_cases` | < 100 ms | JUnit + Micrometer or 100 iterations, assert p99 |
 | `get_case` | < 30 ms | by known UUID |
@@ -355,7 +355,7 @@ target/test-output/quality-report.json
 
 Store reports as CI artifacts; fail build when `passed: false`.
 
-**Future:** Optional [prompt-lab profile](PROMPT_IMPROVEMENT.md) (PRD [§18](PRD.md#18-future-scope-optional), milestones M9/M10) adds specialty-classification prompt evaluation and meta-improvement on validation/test splits.
+**Future:** Optional [prompt-lab profile](future/prompt-lab.md) ([requirements §18](01-requirements.md#18-future-scope-optional), milestones M9/M10)
 
 ---
 
@@ -437,7 +437,7 @@ jobs:
 | M7 | `McpSyncClient` smoke, Claude Desktop checklist |
 | M8 | Docker health + full **test** split quality gate in nightly |
 
-**Optional:** M9 prompt-lab, M10 prompt integration — [PRD §18](PRD.md#18-future-scope-optional), [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md).
+**Optional:** M9 prompt-lab, M10 prompt integration — [requirements §18](01-requirements.md#18-future-scope-optional), [future/prompt-lab.md](future/prompt-lab.md).
 
 ---
 
@@ -450,7 +450,7 @@ jobs:
 - [ ] `get_case` round-trip matches CSV for one known UUID
 - [ ] `medical://stats` resource matches tool output
 - [ ] `case-analysis(caseId, focus=transcription)` returns populated template
-- [ ] p99 latency spot-check under PRD targets
+- [ ] p99 latency spot-check under requirements targets
 
 ---
 
@@ -468,6 +468,6 @@ jobs:
 
 ## Related documentation
 
-- [PRD.md §8 — NFRs](PRD.md#8-non-functional-requirements)
-- [USE_CASES.md — W03 test split workflow](USE_CASES.md#w03--developer-evaluate-classifier-on-test-split)
-- [PLAN.md — Milestones](PLAN.md#milestones)
+- [01-requirements.md §8 — NFRs](01-requirements.md#8-non-functional-requirements)
+- [use-cases.md — W03 test split workflow](use-cases.md#w03--developer-evaluate-classifier-on-test-split)
+- [01-requirements.md §14 — Milestones](01-requirements.md#14-milestones)

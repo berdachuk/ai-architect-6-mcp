@@ -2,18 +2,20 @@
 
 Spring AI 2.0 MCP server that wraps the [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial) dataset (2,464 medical cases, 13 specialties) and exposes search and retrieval tools over SSE.
 
+**Version:** 2.0.0
+
 ## Documentation
 
-| Document | Description |
-|---|---|
-| [docs/README.md](docs/README.md) | Documentation index |
-| [docs/TESTING.md](docs/TESTING.md) | Test strategy, quality benchmarks on test split |
-| [docs/USE_CASES.md](docs/USE_CASES.md) | Actors, workflows, and per-tool use case catalog |
-| [docs/PROMPT_IMPROVEMENT.md](docs/PROMPT_IMPROVEMENT.md) | Optional prompt-lab (M9/M10) — see PRD §18 |
-| [docs/PRD.md](docs/PRD.md) | Product requirements (source of truth) |
-| [docs/PLAN.md](docs/PLAN.md) | Architecture, class design, implementation milestones |
+Full index and reading order: **[docs/README.md](docs/README.md)**
 
-**Version:** 1.6.0
+| Step | Document | Contents |
+|---|---|---|
+| — | [01-requirements.md](docs/01-requirements.md) | Requirements (SRS) — source of truth |
+| 1 | [02-architecture.md](docs/02-architecture.md) | Architecture (SAD) |
+| 2 | [03-design.md](docs/03-design.md) | Detailed design (SDD) |
+| 3 | [04-testing.md](docs/04-testing.md) | Test plan |
+| 4 | [05-deployment.md](docs/05-deployment.md) | Deployment & operations |
+| + | [use-cases.md](docs/use-cases.md) | Use case catalog |
 
 ## Dataset (verified 2026-06-16)
 
@@ -25,7 +27,7 @@ Spring AI 2.0 MCP server that wraps the [hpe-ai/medical-cases-classification-tut
 | `keywords` | Nullable (~36 % empty) |
 | `id` | Server-generated UUID (not in HuggingFace) |
 
-Full specialty list and API mapping: [docs/PRD.md §2](docs/PRD.md#2-source-dataset)
+Full specialty list and API mapping: [docs/01-requirements.md §2](docs/01-requirements.md#2-source-dataset)
 
 ## Stack
 
@@ -60,6 +62,8 @@ Single Maven module; boundaries enforced by Spring Modulith `@ApplicationModule`
 | `mcp` | `@McpTool` / `@McpResource` / `@McpPrompt` — injects service interfaces only |
 | `system` | Actuator health indicators (optional) |
 
+Details: [docs/02-architecture.md](docs/02-architecture.md)
+
 Modulith verification: `mvn clean verify`
 
 ## Prerequisites
@@ -84,6 +88,8 @@ mvn spring-boot:run
 ```
 
 MCP endpoint: `http://localhost:8092/sse`
+
+Full deployment guide: [docs/05-deployment.md](docs/05-deployment.md)
 
 ## Related projects
 

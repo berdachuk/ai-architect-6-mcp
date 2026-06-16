@@ -1,28 +1,45 @@
-# Documentation index
+# Documentation
 
-| Document | Audience | Contents |
-|---|---|---|
-| [PRD.md](PRD.md) | Product / stakeholders | **Source of truth** — requirements, MCP, NFRs, milestones M1–M10 |
-| [PLAN.md](PLAN.md) | Implementers | Modulith layout, class sketches, SQL, Docker, security |
-| [USE_CASES.md](USE_CASES.md) | All audiences | Actors, workflows, per-tool scenarios, out-of-scope list |
-| [TESTING.md](TESTING.md) | Implementers / QA | Test pyramid, quality metrics, split usage (train/validation/test) |
-| [PROMPT_IMPROVEMENT.md](PROMPT_IMPROVEMENT.md) | Architects / ML engineers | Optional `prompt-lab` profile — PRD §18, M9/M10 |
+**Version:** 2.0.0  
+**Project:** `medical-mcp-server`  
+**Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)  
+**Reference implementation:** [med-expert-match-ce](https://github.com/berdachuk/med-expert-match-ce)
 
-**Version:** 1.6.0  
-**Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial) — 2,464 rows, 5 CSV columns, 13 specialties  
-**Reference pattern:** [med-expert-match-ce](https://github.com/berdachuk/med-expert-match-ce)
+Software documentation for project generation, development, and testing. Read in order when scaffolding or implementing from scratch.
 
-## Quick links
+## Development pipeline
 
-- [Dataset schema & specialties (verified)](PRD.md#2-source-dataset)
-- [MCP surface (dataset-compatible)](PRD.md#6-mcp-surface)
-- [Use cases catalog](USE_CASES.md)
-- [Testing & response quality](TESTING.md)
-- [Prompt auto-improvement (M9/M10)](PROMPT_IMPROVEMENT.md)
-- [PRD §14 milestones](PRD.md#14-milestones)
-- [PRD §17 testing & quality](PRD.md#17-testing--quality-assurance)
-- [PRD §18 future prompt-lab](PRD.md#18-future-scope-optional)
-- [Spring Modulith architecture](PRD.md#9-architecture-spring-modulith)
-- [Data loading (CSV)](PRD.md#7-data-loading)
-- [Environment variables](PRD.md#13-environment-variables)
-- [Implementation milestones](PLAN.md#milestones)
+| Step | Document | Standard | Use for |
+|---|---|---|---|
+| — | **[01-requirements.md](01-requirements.md)** | SRS | **Source of truth** — what to build: dataset, MCP surface, NFRs, milestones |
+| 1 | **[02-architecture.md](02-architecture.md)** | SAD | System context, Modulith modules, stack, design decisions |
+| 2 | **[03-design.md](03-design.md)** | SDD | Schema, domain records, service/repository APIs, MCP class sketches |
+| 3 | **[04-testing.md](04-testing.md)** | Test plan | Unit/integration/quality tests, CSV split discipline, CI gates |
+| 4 | **[05-deployment.md](05-deployment.md)** | Ops guide | `application.yml`, env vars, Docker, MCP client config |
+
+## Supplementary
+
+| Document | Use for |
+|---|---|
+| [use-cases.md](use-cases.md) | Actors, workflows, per-tool scenarios, out-of-scope list |
+| [future/prompt-lab.md](future/prompt-lab.md) | Optional M9/M10 — prompt evaluation lab (not required for M1–M8) |
+
+## Quick reference
+
+| Topic | Section |
+|---|---|
+| Dataset schema & 13 specialties | [01-requirements §2](01-requirements.md#2-source-dataset) |
+| MCP tools, resources, prompts | [01-requirements §6](01-requirements.md#6-mcp-surface) |
+| Architecture requirements | [01-requirements §9](01-requirements.md#9-architecture-spring-modulith) |
+| Development milestones M1–M8 | [01-requirements §14](01-requirements.md#14-milestones) |
+| Testing & quality gates | [01-requirements §17](01-requirements.md#17-testing--quality-assurance) · [04-testing](04-testing.md) |
+| Environment variables | [01-requirements §13](01-requirements.md#13-environment-variables) · [05-deployment](05-deployment.md) |
+| Future prompt-lab (M9/M10) | [01-requirements §18](01-requirements.md#18-future-scope-optional) |
+
+## For AI / codegen agents
+
+1. Read **01-requirements** — constrain scope to dataset-backed MCP surface only.
+2. Read **02-architecture** — single Maven module, Spring Modulith package boundaries, JDBC only.
+3. Implement from **03-design** — Flyway schema, interface/impl services, MCP adapters.
+4. Verify with **04-testing** — `ModulithArchitectureTest`, Testcontainers IT, test-split quality gates.
+5. Ship with **05-deployment** — Docker Compose, Ollama embeddings, SSE on `:8092`.
