@@ -190,5 +190,24 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>e2e</id>
+            <properties>
+                <spring.profiles.active>test,e2e</spring.profiles.active>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/integration/e2e/*IntegrationTest.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

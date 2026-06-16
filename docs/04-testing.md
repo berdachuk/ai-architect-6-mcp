@@ -443,14 +443,18 @@ jobs:
 
 ## 11. Manual smoke checklist (M7)
 
-- [ ] `get_dataset_stats` → 2464 rows, 13 specialties
-- [ ] `list_specialties` → includes `Radiology` (50)
-- [ ] `search_cases(query="pacemaker", specialty="Cardiovascular / Pulmonary")` → non-empty
-- [ ] `semantic_search(query="knee MRI tear", specialty="Orthopedic")` → relevant titles
-- [ ] `get_case` round-trip matches CSV for one known UUID
-- [ ] `medical://stats` resource matches tool output
-- [ ] `case-analysis(caseId, focus=transcription)` returns populated template
-- [ ] p99 latency spot-check under requirements targets
+Automated via `McpSseSmokeIntegrationTest` (train-sample-10 fixture). Full 2464-row checks: manual/staging with `mvn verify -Pe2e` + Ollama.
+
+- [x] `get_dataset_stats` → row/split counts match loaded fixture (10 train rows in CI)
+- [x] `list_specialties` → non-empty specialty counts (8 in fixture)
+- [x] `search_cases(query="pacemaker", …)` → non-empty (fixture: Pacemaker Interrogation)
+- [x] `semantic_search(query=…)` → similarity matches returned
+- [x] `get_case` round-trip matches search UUID
+- [x] `medical://stats` resource matches tool output
+- [x] `case-analysis(caseId, focus=transcription)` returns populated template
+- [ ] `get_dataset_stats` → 2464 rows, 13 specialties (full load — M8/staging)
+- [ ] `list_specialties` → includes `Radiology` (50) (full load)
+- [ ] p99 latency spot-check under requirements targets (manual)
 
 ---
 

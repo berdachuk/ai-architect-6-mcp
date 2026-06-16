@@ -1,0 +1,12 @@
+# Manual / staging E2E profile — full HuggingFace dataset + live Ollama embeddings.
+# Run: mvn verify -Pe2e (requires Ollama with nomic-embed-text:v1.5 on host).
+# Automated SSE smoke uses the test profile fixture via McpSseSmokeIntegrationTest.
+
+medicalmcp:
+  dataset:
+    loader:
+      enabled: true
+      sources:
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_train.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_validation.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_test.csv

@@ -11,10 +11,10 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-05-embedding-module.md](archive/M-05-embedding-module.md) | M4 | ✅ Archived |
 | [archive/M-06-mcp-module.md](archive/M-06-mcp-module.md) | M5 | ✅ Archived |
 | [archive/M-07-config-security.md](archive/M-07-config-security.md) | M6 | ✅ Archived |
-| [M-08-e2e-smoke.md](M-08-e2e-smoke.md) | M7 | ⬜ **Active** |
-| [M-09-docker-quality-gate.md](M-09-docker-quality-gate.md) | M8 | ⬜ Planned |
+| [archive/M-08-e2e-smoke.md](archive/M-08-e2e-smoke.md) | M7 | ✅ Archived |
+| [M-09-docker-quality-gate.md](M-09-docker-quality-gate.md) | M8 | ⬜ **Active** |
 
-**Chain:** M-08 → M-09
+**Chain:** M-09
 
 Completed plans are moved to `archive/` when no longer active.
 

@@ -4,18 +4,17 @@
 
 ## Current focus
 
-**M6 complete.** Next: **M7** — end-to-end MCP smoke (`McpSyncClient`, Claude Desktop checklist). Plan: [.agents/plans/M-08-e2e-smoke.md](../plans/M-08-e2e-smoke.md).
+**M7 complete.** Next: **M8** — Docker Compose, CI, quality gate on test split. Plan: [.agents/plans/M-09-docker-quality-gate.md](../plans/M-09-docker-quality-gate.md).
 
 ## Next steps
 
-1. E2E profile / `McpSyncClient` integration against running server
-2. Full dataset load smoke (2464 rows) with Ollama embeddings
-3. Manual checklist in [docs/04-testing.md §11](../../docs/04-testing.md#11-manual-smoke-checklist-m7)
+1. `Dockerfile` + `docker-compose.yml` (PG + server; Ollama on host)
+2. GitHub Actions: `mvn test`, `mvn verify -Pintegration`
+3. `quality` Maven profile — full test-split retrieval benchmarks
 
 ## Verified
 
+- `McpSseSmokeIntegrationTest` — all 5 tools, 2 resources, `case-analysis` prompt over SSE (M7)
 - `RetrievalProperties`, `SecurityConfig`, actuator, cache TTL (M6)
-- MCP tools (5), resources (2), `case-analysis` prompt (M5)
-- `@InjectSql` in `repository/impl` only; IT `@Sql` cleanup (DEC-010/011)
-- `SharedPostgresContainer` + `@Testcontainers` (DEC-009)
+- MCP contract ITs (M5); `@InjectSql` / Testcontainers patterns (DEC-009–011)
 - `mvn verify -Pintegration` via WSL

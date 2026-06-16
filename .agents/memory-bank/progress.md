@@ -58,12 +58,18 @@
 - MCP resources return JSON strings; invalid UUID guard in tools/prompts
 - **NFR-003, NFR-004, REQ-006** · plan archived: `M-07-config-security.md`
 
+## 2026-06-16 — M7 End-to-end smoke
+
+- `McpSseSmokeIntegrationTest` — `McpSyncClient` over SSE (`@RANDOM_PORT`)
+- `McpSseTestClientFactory`, `McpSmokeTestSupport`; Maven `e2e` profile + `application-e2e.yml`
+- **REQ-006, NFR-001** · plan archived: `M-08-e2e-smoke.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M6 | ✅ Complete |
-| M7–M8 | ⬜ Not started |
+| M1–M7 | ✅ Complete |
+| M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

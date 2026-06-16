@@ -1,6 +1,6 @@
 # M-09 — Docker + quality gate (M8)
 
-**Status:** ⬜ Planned  
+**Status:** ⬜ Active  
 **Date:** 2026-06-16  
 **Milestone:** M8 — [docs/01-requirements.md §14](../../docs/01-requirements.md#14-milestones)
 
@@ -10,7 +10,7 @@ Ship Docker Compose stack, CI quality profile, and full **test**-split retrieval
 
 ## Prerequisites
 
-- [M-08](M-08-e2e-smoke.md) complete — E2E smoke validated
+- [M-08](archive/M-08-e2e-smoke.md) complete — E2E smoke validated
 - Full dataset + embeddings loadable in CI/nightly env
 
 ## Deliverables

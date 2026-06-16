@@ -104,4 +104,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M6 complete — M7 E2E smoke next ([M-08 plan](.agents/plans/M-08-e2e-smoke.md)).
+**Current status:** M7 complete — M8 Docker/quality gate next ([M-09 plan](.agents/plans/M-09-docker-quality-gate.md)).
