@@ -43,6 +43,6 @@ Profiles: [docs/04-testing.md §3](../docs/04-testing.md#3-test-pyramid)
 | Artifact | Status |
 |---|---|
 | `docs/` v2.0.0 | ✅ Complete |
-| `pom.xml` / `src/` | ⬜ M1 |
+| `pom.xml` / `src/` | ✅ M1 foundation |
 | `.agents/` AI context | ✅ Bootstrapped |
 | CI workflow | ⬜ Not configured |

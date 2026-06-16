@@ -564,7 +564,7 @@ Implementation milestones with aligned test deliverables ([04-testing.md §10](0
 
 | # | Milestone | Key deliverables | Tests | Status |
 |---|---|---|---|---|
-| M1 | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, Boot stub | `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` | ⬜ |
+| M1 | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, Boot stub | `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` | ✅ |
 | M2 | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | `DatasetLoaderIntegrationTest` (train CSV sample) | ⬜ |
 | M3 | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats | Repository IT, `FtsRetrievalQualityTest` (subset) | ⬜ |
 | M4 | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2 | Embedding IT, `SemanticRetrievalQualityTest` | ⬜ |

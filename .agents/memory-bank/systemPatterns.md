@@ -49,5 +49,5 @@ Executable BDD: **not yet introduced** — use [bdd-traceability skill](../skill
 
 ## Known gaps
 
-- **No Java source yet** — structure is documented/planned only (M1 pending).
-- Requirement IDs (`REQ-###`) not yet assigned in SRS — use section refs until M1 traceability pass.
+- Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M2+.
+- Repository and services not yet implemented (M2+).

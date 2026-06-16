@@ -59,3 +59,12 @@ ADR-style log. Full rationale in linked docs where applicable.
 | Date | 2026-06-16 |
 | Rationale | Tool-agnostic skills + memory bank; root `AGENTS.md` as index |
 | Source | [docs/ai-context-strategy.md](../docs/ai-context-strategy.md) |
+
+## DEC-007 — Modulith test without Spring context
+
+| Field | Value |
+|---|---|
+| Status | Accepted |
+| Date | 2026-06-16 |
+| Rationale | `ModulithArchitectureTest` uses `ApplicationModules.verify()` without DB — fast `mvn test` |
+| Source | M1 implementation |

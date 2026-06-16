@@ -5,8 +5,8 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | Plan | Milestone | Status |
 |---|---|---|
 | [archive/M-01-ai-context-foundation.md](archive/M-01-ai-context-foundation.md) | Bootstrap | ✅ Archived |
-| M-02-modulith-foundation | M1 | ⬜ Planned |
-| M-03-dataset-loader | M2 | ⬜ Planned |
+| [archive/M-02-modulith-foundation.md](archive/M-02-modulith-foundation.md) | M1 | ✅ Archived |
+| [M-03-dataset-loader.md](M-03-dataset-loader.md) | M2 | ⬜ Active |
 | M-04-retrieval-module | M3 | ⬜ Planned |
 | M-05-embedding-module | M4 | ⬜ Planned |
 | M-06-mcp-module | M5 | ⬜ Planned |

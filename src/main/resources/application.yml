@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: medical-mcp-server
+  datasource:
+    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5432/${MEDICALMCP_DB_NAME:medical_mcp}
+    username: ${MEDICALMCP_DB_USERNAME:medical_mcp}
+    password: ${MEDICALMCP_DB_PASSWORD:medical_mcp}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-init-sql: SET hnsw.ef_search = 40
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: ${SERVER_PORT:8092}

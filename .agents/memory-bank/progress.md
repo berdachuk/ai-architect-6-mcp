@@ -16,11 +16,19 @@
 - **Tests:** none
 - **Traceability:** foundation for M1+ implementation
 
+## 2026-06-16 — M1 Modulith foundation
+
+- Added `pom.xml`, `MedicalMcpApplication`, 7 Modulith modules, 5 domain records
+- Flyway `V1__init_medical_cases.sql` (pgvector, HNSW, FTS)
+- Tests: `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` — all pass
+- **REQ-005, REQ-009** · modules: all · plan archived: `M-02-modulith-foundation.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M8 | ⬜ Not started |
+| M1 | ✅ Complete |
+| M2–M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)
