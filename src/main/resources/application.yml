@@ -15,3 +15,13 @@ spring:
 
 server:
   port: ${SERVER_PORT:8092}
+
+medicalmcp:
+  dataset:
+    loader:
+      enabled: ${MEDICALMCP_DATASET_LOADER_ENABLED:false}
+      batch-size: ${MEDICALMCP_DATASET_LOADER_BATCH_SIZE:50}
+      sources:
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_train.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_validation.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_test.csv

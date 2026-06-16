@@ -1,3 +1,11 @@
 spring:
   flyway:
     enabled: true
+
+medicalmcp:
+  dataset:
+    loader:
+      enabled: false
+      batch-size: 50
+      sources:
+        - classpath:dataset/train-sample-10.csv
