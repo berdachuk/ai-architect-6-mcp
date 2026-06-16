@@ -1,7 +1,8 @@
 package com.example.medicalmcp.promptlab.template;
 
+import com.example.medicalmcp.core.prompt.MedicalSpecialtyLabels;
+import com.example.medicalmcp.core.prompt.PromotedSpecialtyClassificationInstructions;
 import com.example.medicalmcp.promptlab.domain.PromptTemplate;
-import com.example.medicalmcp.promptlab.normalization.SpecialtyLabelNormalizer;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,9 +11,7 @@ import java.util.stream.Collectors;
 
 public final class PromptTemplateLibrary {
 
-    private static final String ALLOWED_LABELS = SpecialtyLabelNormalizer.CANONICAL_LABELS.stream()
-            .map(SpecialtyLabelNormalizer::toSnakeCase)
-            .collect(Collectors.joining(", "));
+    private static final String ALLOWED_LABELS = MedicalSpecialtyLabels.allowedLabelsSnakeCase();
 
     private static final Map<String, PromptTemplate> TEMPLATES = List.of(
                     new PromptTemplate(
@@ -36,15 +35,9 @@ public final class PromptTemplateLibrary {
                             Answer: PREDICTED_LABEL: <label>
                             """.formatted(ALLOWED_LABELS)),
                     new PromptTemplate(
-                            "react_self_reflection",
+                            PromotedSpecialtyClassificationInstructions.TEMPLATE_ID,
                             "ReAct + self-reflection",
-                            """
-                            Classify the medical case into exactly one of these labels (snake_case):
-                            %s
-
-                            Thought → Action → Observation → Reflection → Answer.
-                            End with: PREDICTED_LABEL: <label>
-                            """.formatted(ALLOWED_LABELS)))
+                            PromotedSpecialtyClassificationInstructions.classificationBlock()))
             .stream()
             .collect(Collectors.toUnmodifiableMap(PromptTemplate::id, Function.identity()));
 

@@ -428,6 +428,7 @@ Automated via `McpSseSmokeIntegrationTest` (train-sample-10 fixture). Full 2464-
 - [x] `get_case` round-trip matches search UUID
 - [x] `medical://stats` resource matches tool output
 - [x] `case-analysis(caseId, focus=transcription)` returns populated template
+- [x] `case-analysis(caseId, focus=specialty)` includes promoted classification block (M10)
 - [ ] `get_dataset_stats` → 2464 rows, 13 specialties (full load — M8/staging)
 - [ ] `list_specialties` → includes `Radiology` (50) (full load)
 - [ ] p99 latency spot-check under requirements targets (manual)

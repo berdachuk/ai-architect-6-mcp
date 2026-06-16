@@ -104,4 +104,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M9 prompt lab complete — optional M10 prompt integration next ([M-11 plan](.agents/plans/M-11-prompt-integration.md)).
+**Current status:** M10 prompt integration complete — optional M-12 meta-prompting lab next ([M-12 plan](.agents/plans/M-12-meta-prompting-lab.md)).

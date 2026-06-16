@@ -1,5 +1,6 @@
 package com.example.medicalmcp.promptlab.normalization;
 
+import com.example.medicalmcp.core.prompt.MedicalSpecialtyLabels;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -9,20 +10,7 @@ import org.springframework.util.StringUtils;
 
 public final class SpecialtyLabelNormalizer {
 
-    public static final Set<String> CANONICAL_LABELS = Set.of(
-            "Cardiovascular / Pulmonary",
-            "Orthopedic",
-            "Neurology",
-            "Gastroenterology",
-            "Obstetrics / Gynecology",
-            "Hematology - Oncology",
-            "Neurosurgery",
-            "ENT - Otolaryngology",
-            "Nephrology",
-            "Psychiatry / Psychology",
-            "Ophthalmology",
-            "Pediatrics - Neonatal",
-            "Radiology");
+    public static final Set<String> CANONICAL_LABELS = MedicalSpecialtyLabels.CANONICAL_LABELS;
 
     private static final Map<String, String> ALIASES = buildAliases();
 
@@ -41,12 +29,7 @@ public final class SpecialtyLabelNormalizer {
     }
 
     public static String toSnakeCase(String canonicalLabel) {
-        return canonicalLabel
-                .toLowerCase(Locale.ROOT)
-                .replace(" - ", "_")
-                .replace(" / ", "_")
-                .replace(" ", "_")
-                .replaceAll("_+", "_");
+        return MedicalSpecialtyLabels.toSnakeCase(canonicalLabel);
     }
 
     private static Map<String, String> buildAliases() {

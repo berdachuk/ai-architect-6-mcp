@@ -307,7 +307,7 @@ Injects dataset fields from a case into an LLM prompt template. **No completion 
 | `caseId` | Yes | Server UUID of the case |
 | `focus` | No | Which dataset field(s) to emphasize: `description` \| `transcription` \| `keywords` \| `specialty` \| `all` (default) |
 
-`focus` values map 1:1 to columns: `description`, `transcription`, `keywords`, `medical_specialty`. When `keywords` is null, the template omits that section.
+`focus` values map 1:1 to columns: `description`, `transcription`, `keywords`, `medical_specialty`. When `keywords` is null, the template omits that section. **`focus=specialty`** additionally injects the promoted `react_self_reflection` classification block from prompt-lab eval (M10); other focus values remain dataset-field templates only.
 
 **Not exposed:** MCP completions (`@McpComplete`) — removed; prefix-matching `sample_name` while the arg is named `caseId` is incompatible with the dataset model.
 
@@ -577,8 +577,8 @@ Implementation milestones with aligned test deliverables ([04-testing.md §10](0
 
 | # | Milestone | Key deliverables | Reference |
 |---|---|---|---|
-| M9 | Prompt lab | `promptlab` module, meta-prompting, eval tools (`prompt-lab` profile) | [future/prompt-lab.md](future/prompt-lab.md), [§18](#18-future-scope-optional) |
-| M10 | Prompt integration | Wire promoted template into `case-analysis` | [future/prompt-lab.md §9](future/prompt-lab.md#9-implementation-phases) P6 |
+| M9 | Prompt lab | `promptlab` module, offline eval harness (`prompt-lab` profile) | [future/prompt-lab.md](future/prompt-lab.md), [§18](#18-future-scope-optional) | ✅ |
+| M10 | Prompt integration | Wire promoted template into `case-analysis` (`focus=specialty`) | [future/prompt-lab.md §9](future/prompt-lab.md#9-implementation-phases) P6 | ✅ |
 
 ---
 

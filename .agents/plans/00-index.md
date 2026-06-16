@@ -14,9 +14,10 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-08-e2e-smoke.md](archive/M-08-e2e-smoke.md) | M7 | ✅ Archived |
 | [archive/M-09-docker-quality-gate.md](archive/M-09-docker-quality-gate.md) | M8 | ✅ Archived |
 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) | M9 | ✅ Archived |
-| [M-11-prompt-integration.md](M-11-prompt-integration.md) | M10 | ⬜ **Active** |
+| [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) | M10 | ✅ Archived |
+| [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) | M9 ext | ⬜ **Active** |
 
-**Chain:** M-11 (optional future scope)
+**Chain:** M-12 (optional extended lab — meta-prompting MCP tools)
 
 Completed plans are moved to `archive/` when no longer active.
 
@@ -39,10 +40,12 @@ Completed plans are moved to `archive/` when no longer active.
 - `mvn test` — unit + Modulith (no Docker)
 - `mvn verify -Pintegration` — Testcontainers; run from **WSL** on Windows
 - `mvn verify -Pquality` — full test-split benchmarks (M8+)
+- `mvn verify -Pprompt-lab` — offline prompt-lab eval (M9+)
 
 ## Optional (future)
 
 | Plan | Milestone | Reference |
 |---|---|---|
 | M-10 prompt-lab | M9 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) |
-| M-11 prompt integration | M10 | [M-11-prompt-integration.md](M-11-prompt-integration.md) |
+| M-11 prompt integration | M10 | [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) |
+| M-12 meta-prompting lab | M9 ext | [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) |

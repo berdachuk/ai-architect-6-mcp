@@ -77,12 +77,19 @@
 - `mvn verify -Pprompt-lab`; metrics merged into `quality-report.json`
 - **REQ §18** · plan archived: `M-10-prompt-lab.md`
 
+## 2026-06-16 — M10 Prompt integration (optional)
+
+- `core/prompt/PromotedSpecialtyClassificationInstructions` — shared `react_self_reflection` winner
+- `MedicalCasePrompts` — `focus=specialty` injects promoted block + case text fields
+- Tests: `MedicalCasePromptsStructureTest`, extended `McpToolsContractIntegrationTest`
+- **REQ §18** · plan archived: `M-11-prompt-integration.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
 | M1–M8 | ✅ Complete |
-| M9 | ✅ Complete (optional) |
-| M10 | ⬜ Optional (future) |
+| M9–M10 | ✅ Complete (optional) |
+| M9 ext (M-12) | ⬜ Optional (meta-prompting lab) |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)
