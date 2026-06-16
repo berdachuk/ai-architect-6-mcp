@@ -50,7 +50,7 @@ Executable BDD: **not yet introduced** — use [bdd-traceability skill](../skill
 ## Known gaps
 
 - Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M3+.
-- Retrieval and embedding services not yet implemented (M3+).
+- Retrieval and embedding services: FTS/stats done (M3); semantic search pending (M4+).
 
 ## Modulith named interfaces
 

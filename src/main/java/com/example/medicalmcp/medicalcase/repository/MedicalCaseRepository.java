@@ -16,6 +16,8 @@ public interface MedicalCaseRepository {
 
     List<SpecialtyCount> listSpecialties();
 
+    Map<String, Long> countBySplit();
+
     long countAll();
 
     void insertBatch(List<MedicalCase> cases);
