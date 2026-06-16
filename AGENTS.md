@@ -105,4 +105,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M10 prompt integration complete. User guides: [docs/guides/README.md](docs/guides/README.md). Optional M-12 meta-prompting lab: [M-12 plan](.agents/plans/M-12-meta-prompting-lab.md).
+**Current status:** User guides complete ([docs/guides/README.md](docs/guides/README.md)). Optional M-12 meta-prompting lab next ([M-12 plan](.agents/plans/M-12-meta-prompting-lab.md)).

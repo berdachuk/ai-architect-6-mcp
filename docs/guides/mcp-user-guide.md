@@ -252,3 +252,4 @@ Inspect the promoted block and compare model output to the dataset `medical_spec
 - [04-testing.md §11](../04-testing.md#11-manual-smoke-checklist-m7) — automated smoke checklist
 - [lm-studio-mcp-manual-test.md](lm-studio-mcp-manual-test.md) — manual testing with LM Studio
 - [05-deployment.md](../05-deployment.md) — Docker, env vars, Claude Desktop config
+- [claude-desktop-mcp.md](claude-desktop-mcp.md) — Claude Desktop manual smoke test

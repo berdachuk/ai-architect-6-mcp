@@ -16,10 +16,10 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) | M9 | ✅ Archived |
 | [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) | M10 | ✅ Archived |
 | [archive/M-13-user-guides.md](archive/M-13-user-guides.md) | Docs | ✅ Archived |
-| [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) | M9 ext | ⬜ Active |
-| [M-14-claude-desktop-mcp.md](M-14-claude-desktop-mcp.md) | Docs | ⬜ **Active** |
+| [archive/M-14-claude-desktop-mcp.md](archive/M-14-claude-desktop-mcp.md) | Docs | ✅ Archived |
+| [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) | M9 ext | ⬜ **Active** |
 
-**Chain:** M-12 (optional code) · M-14 (optional docs)
+**Chain:** M-12 (optional meta-prompting MCP tools)
 
 Completed plans are moved to `archive/` when no longer active.
 
@@ -52,4 +52,8 @@ Completed plans are moved to `archive/` when no longer active.
 | M-11 prompt integration | M10 | [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) |
 | M-12 meta-prompting lab | M9 ext | [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) |
 | M-13 user guides | Docs | [archive/M-13-user-guides.md](archive/M-13-user-guides.md) |
-| M-14 Claude Desktop guide | Docs | [M-14-claude-desktop-mcp.md](M-14-claude-desktop-mcp.md) |
+| M-14 Claude Desktop guide | Docs | [archive/M-14-claude-desktop-mcp.md](archive/M-14-claude-desktop-mcp.md) |
+
+## User guides
+
+End-user how-to: [docs/guides/README.md](../../docs/guides/README.md)

@@ -90,6 +90,11 @@
 - Linked from `docs/README.md`, root `README.md`, `05-deployment.md`
 - Plan archived: `M-13-user-guides.md`
 
+## 2026-06-16 — M14 Claude Desktop guide (docs)
+
+- `docs/guides/claude-desktop-mcp.md` — config, smoke checklist, Windows MSIX notes
+- Plan archived: `M-14-claude-desktop-mcp.md`
+
 ## Milestone status
 
 | Milestone | Status |

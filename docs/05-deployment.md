@@ -234,6 +234,8 @@ volumes:
 }
 ```
 
+Step-by-step smoke test: [guides/claude-desktop-mcp.md](guides/claude-desktop-mcp.md).
+
 ### `med-expert-match-ce` (`application.yml`)
 
 ```yaml

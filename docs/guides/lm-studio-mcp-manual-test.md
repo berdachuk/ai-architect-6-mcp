@@ -109,7 +109,7 @@ Save the file. LM Studio reloads MCP servers automatically.
 
 Do **not** use `/mcp` alone — you will get 404.
 
-Compare with Claude Desktop config in [05-deployment.md](../05-deployment.md#mcp-client-connection).
+Compare with Claude Desktop guide: [claude-desktop-mcp.md](claude-desktop-mcp.md).
 
 ---
 
@@ -199,5 +199,6 @@ mvn verify -Pintegration  # Full Testcontainers contract tests
 ## Related documentation
 
 - [mcp-user-guide.md](mcp-user-guide.md) — tool and prompt reference
-- [05-deployment.md](../05-deployment.md) — Docker, env vars, Claude Desktop
+- [05-deployment.md](../05-deployment.md) — Docker, env vars
+- [claude-desktop-mcp.md](claude-desktop-mcp.md) — Claude Desktop smoke test
 - [prompt-lab-user-guide.md](prompt-lab-user-guide.md) — optional eval profile (not used in this smoke test)
