@@ -1,7 +1,7 @@
 # Architecture & Implementation Plan
 ## `medical-mcp-server` — HuggingFace Dataset Wrapper
 
-**Version:** 1.3.0  
+**Version:** 1.5.0  
 **Date:** 2026-06-16  
 **Requirements:** [PRD.md](PRD.md)  
 **Dataset:** [hpe-ai/medical-cases-classification-tutorial](https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial)  
@@ -22,29 +22,27 @@
             │  SSE / MCP 2024-11-05          │
             ▼                                ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│  medical-mcp-server  :8092                                      │
+│  medical-mcp-server  :8092  (single module, Spring Modulith)      │
 │                                                                 │
-│  medical-mcp-tools (Spring AI annotation layer)                 │
+│  mcp/ — Spring AI annotation adapters                           │
 │  ┌──────────────────┬───────────────────┬──────────────────┐   │
 │  │ @McpTool ×5      │ @McpResource ×2   │ @McpPrompt ×1    │   │
 │  └────────┬─────────┴─────────┬─────────┴──────────────────┘   │
-│           │                   │                                 │
-│  medical-mcp-infrastructure (JDBC — no JPA)                     │
+│           │ injects service interfaces only                     │
+│  retrieval/ · dataset/ · embedding/ · medicalcase/              │
 │  ┌──────────────────┬───────────────────┬──────────────────┐   │
-│  │ MedicalCase      │ PgVector          │ Dataset          │   │
-│  │ Repository       │ SearchService     │ Loader           │   │
-│  │ (NamedJdbcTmpl)  │ (FTS + vector)    │ (Parquet→JDBC)   │   │
-│  │                  │ EmbeddingEndpoint │                  │   │
-│  │                  │ Pool (multi-node) │                  │   │
+│  │ VectorSearch     │ DatasetLoader     │ EmbeddingEndpoint│   │
+│  │ Service          │ Service           │ Pool + Embedding │   │
+│  │ + impl           │ + impl            │ Service (API)    │   │
 │  └────────┬─────────┴─────────┬─────────┴──────┬───────────┘   │
 │           │                   │                 │               │
-│  medical-mcp-app (Boot entry, Security, Actuator)               │
+│  core/ — config, security, Flyway, Actuator                     │
 └───────────┼───────────────────┼─────────────────┼───────────────┘
             │                   │                 │
             ▼                   ▼                 ▼
 ┌────────────────────┐  ┌────────────────┐  ┌──────────────────┐
 │  PostgreSQL 17     │  │  Ollama        │  │  HuggingFace     │
-│  + pgvector ext.   │  │  nomic-embed   │  │  Parquet files   │
+│  + pgvector ext.   │  │  nomic-embed   │  │  CSV files       │
 │  medical_case tbl  │  │  text:v1.5     │  │  (one-time load) │
 │  HNSW idx 768-dim  │  │  768 dims      │  │                  │
 └────────────────────┘  └────────────────┘  └──────────────────┘
@@ -52,25 +50,102 @@
 
 ---
 
-## Module Structure
+## Module Structure (Spring Modulith)
+
+Single Maven module with **package-based application modules** — same layout as [`med-expert-match-ce`](https://github.com/berdachuk/med-expert-match-ce/tree/main/src/main/java/com/berdachuk/medexpertmatch).
 
 ```
 medical-mcp-server/
-├── pom.xml                                      # Parent BOM
-├── medical-mcp-domain/                          # Pure Java 21 records
-├── medical-mcp-infrastructure/                  # JDBC, pgvector, loader, Flyway, embedding pool
-│   └── embedding/                               # EmbeddingEndpointPool + config (port from med-expert-match-ce)
-├── medical-mcp-tools/                           # @McpTool / @McpResource / @McpPrompt
-└── medical-mcp-app/                             # Boot entry, security, application.yml
+├── pom.xml
+├── docker-compose.yml
+├── Dockerfile
+└── src/
+    ├── main/
+    │   ├── java/com/example/medicalmcp/
+    │   │   ├── MedicalMcpApplication.java
+    │   │   ├── core/                         # config, exception, health, util
+    │   │   ├── medicalcase/
+    │   │   │   ├── domain/                   # records: MedicalCase, CaseSummary, …
+    │   │   │   ├── repository/               # MedicalCaseRepository (interface)
+    │   │   │   ├── repository/impl/          # MedicalCaseRepositoryImpl (@Repository)
+    │   │   │   └── package-info.java         # @ApplicationModule(allowedDependencies = "core :: *")
+    │   │   ├── embedding/
+    │   │   │   ├── service/EmbeddingService.java
+    │   │   │   ├── service/impl/EmbeddingServiceImpl.java
+    │   │   │   ├── multiendpoint/            # EmbeddingEndpointPool, EndpointState, …
+    │   │   │   ├── config/                   # EmbeddingEndpointPoolConfig, properties
+    │   │   │   └── package-info.java
+    │   │   ├── retrieval/
+    │   │   │   ├── service/VectorSearchService.java
+    │   │   │   ├── service/impl/VectorSearchServiceImpl.java
+    │   │   │   └── package-info.java
+    │   │   ├── dataset/
+    │   │   │   ├── service/DatasetLoaderService.java
+    │   │   │   ├── service/impl/DatasetLoaderServiceImpl.java
+    │   │   │   └── package-info.java
+    │   │   ├── mcp/                          # MedicalCaseTools, Resources, Prompts, Completions
+    │   │   │   └── package-info.java
+    │   │   └── system/                       # EmbeddingPoolHealthIndicator (optional)
+    │   └── resources/
+    │       ├── application.yml
+    │       ├── db/migration/                 # V1__init_medical_cases.sql
+    │       └── sql/                          # optional per-module SQL (@InjectSql)
+    └── test/java/com/example/medicalmcp/
+        └── ModulithArchitectureTest.java
 ```
 
-### Module dependency direction
+### Modulith dependency rules (`@ApplicationModule`)
 
+```java
+// medicalcase/package-info.java
+@ApplicationModule(allowedDependencies = "core :: *")
+package com.example.medicalmcp.medicalcase;
+
+// embedding/package-info.java
+@ApplicationModule(allowedDependencies = {"core :: *"})
+package com.example.medicalmcp.embedding;
+
+// retrieval/package-info.java
+@ApplicationModule(allowedDependencies = {"core :: *", "medicalcase :: *", "embedding :: *"})
+package com.example.medicalmcp.retrieval;
+
+// dataset/package-info.java
+@ApplicationModule(allowedDependencies = {"core :: *", "medicalcase :: *", "embedding :: *"})
+package com.example.medicalmcp.dataset;
+
+// mcp/package-info.java
+@ApplicationModule(allowedDependencies = {
+    "core :: *", "medicalcase :: *", "retrieval :: *", "embedding :: *", "dataset :: *"
+})
+package com.example.medicalmcp.mcp;
+
+// system/package-info.java
+@ApplicationModule(allowedDependencies = {"core :: *", "embedding :: *"})
+package com.example.medicalmcp.system;
 ```
-medical-mcp-app
-  └── medical-mcp-tools
-        └── medical-mcp-infrastructure
-              └── medical-mcp-domain (zero deps)
+
+### Interface / implementation convention
+
+| Pattern | med-expert-match-ce example | medical-mcp-server |
+|---|---|---|
+| Repository API | `medicalcase/repository/MedicalCaseRepository.java` | Same package layout |
+| Repository impl | `medicalcase/repository/impl/MedicalCaseRepositoryImpl.java` | JDBC via `NamedParameterJdbcTemplate` |
+| Service API | `embedding/service/EmbeddingService.java` | `EmbeddingService`, `VectorSearchService`, `DatasetLoaderService` |
+| Service impl | `embedding/service/impl/MultiEndpointEmbeddingServiceImpl.java` | `*ServiceImpl` in `service/impl/` |
+| MCP layer | N/A (REST in med-expert-match-ce) | `mcp/*` — injects interfaces only |
+
+**Rules:** no `@Service` / `@Repository` on interfaces; impl classes are the only `@Component` stereotypes; MCP and cross-module code never references `*.impl.*` types.
+
+### Modulith verification (CI)
+
+```java
+@ApplicationModuleTest
+class ModulithArchitectureTest {
+    @Test
+    void verifyModuleBoundaries() {
+        ApplicationModules.of(MedicalMcpApplication.class).verify();
+    }
+}
 ```
 
 ---
@@ -137,6 +212,9 @@ Aligned exactly with `med-expert-match-ce` versions to avoid dep-hell:
 |---|---|---|
 | Spring Boot | 4.1.0 | Parent POM |
 | Spring AI BOM | 2.0.0 | |
+| Spring Modulith BOM | 2.1.0 | Aligned with med-expert-match-ce |
+| `spring-modulith-core` | 2.1.0 | `@ApplicationModule` |
+| `spring-modulith-starter-test` | 2.1.0 | `ApplicationModuleTest`, `verify()` |
 | Java | 21 | `--enable-preview` |
 | `spring-ai-starter-mcp-server-webmvc` | 2.0.0 | SSE transport |
 | `spring-ai-openai` | 2.0.0 | Manual `OpenAiEmbeddingModel` in pool (no auto-config) |
@@ -148,6 +226,35 @@ Aligned exactly with `med-expert-match-ce` versions to avoid dep-hell:
 | Testcontainers | 2.0.5 | `pgvector/pgvector:pg17` image |
 | `spring-boot-starter-jdbc` | (Boot BOM) | NamedParameterJdbcTemplate |
 | `spring-boot-starter-actuator` | (Boot BOM) | |
+
+### Parent `pom.xml` (single module)
+
+```xml
+<properties>
+  <java.version>21</java.version>
+  <spring-ai.version>2.0.0</spring-ai.version>
+  <spring-modulith.version>2.1.0</spring-modulith.version>
+</properties>
+
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-bom</artifactId>
+      <version>${spring-ai.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.modulith</groupId>
+      <artifactId>spring-modulith-bom</artifactId>
+      <version>${spring-modulith.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
 
 ---
 
@@ -167,7 +274,7 @@ CREATE TABLE medical_case (
     transcription     TEXT,
     medical_specialty VARCHAR(120),
     keywords          TEXT,
-    split             VARCHAR(12),   -- 'train' | 'test' | 'validation'
+    split             VARCHAR(12),   -- 'train' | 'validation' | 'test'
     embedding         VECTOR(768),   -- nomic-embed-text:v1.5
     fts               TSVECTOR GENERATED ALWAYS AS (
                           to_tsvector('english',
@@ -203,11 +310,11 @@ CREATE INDEX idx_medical_case_specialty_trgm
 {sample_name}. {description} {keywords}
 ```
 
-`transcription` is intentionally excluded from the embedding input — it is too long (avg 600+ tokens) and would dominate the vector signal. FTS over `transcription` covers keyword retrieval.
+`transcription` is intentionally excluded from the embedding input — it is too long (avg 600+ tokens) and would dominate the vector signal. FTS over `transcription` covers keyword retrieval. Skip null/empty `keywords` when building embed text (~36 % of HF rows).
 
 ---
 
-## Domain Records (`medical-mcp-domain`)
+## Domain Records (`medicalcase/domain`)
 
 ```java
 // Zero framework dependencies — pure Java 21
@@ -233,7 +340,7 @@ public record CaseSummary(         // Returned by list/search tools (no transcri
 ) {}
 
 public record SemanticMatch(
-    CaseSummary cas,
+    CaseSummary caseSummary,
     double similarity
 ) {}
 
@@ -251,40 +358,43 @@ public record DatasetStats(
 
 ---
 
-## Infrastructure Layer (`medical-mcp-infrastructure`)
+## Application modules (implementation)
 
-### `MedicalCaseRepository` — NamedParameterJdbcTemplate only
+### `medicalcase` — repository API + JDBC impl
 
 ```java
-@Repository
-public class MedicalCaseRepository {
+// medicalcase/repository/MedicalCaseRepository.java — public API
+public interface MedicalCaseRepository {
+    Optional<MedicalCase> findById(UUID id);
+    List<CaseSummary> fullTextSearch(String query, String specialty, String split, int limit);
+    List<SpecialtyCount> listSpecialties();
+    long countAll();
+    void insertBatch(List<MedicalCase> cases);
+    void updateEmbeddingsBatch(Map<UUID, float[]> embeddings);
+}
 
-    // findById → full MedicalCase (includes transcription)
-    // findAll(int limit, int offset) → List<CaseSummary>
-    // fullTextSearch(String query, String specialty, String split, int limit) → List<CaseSummary>
-    //   SQL: WHERE fts @@ plainto_tsquery('english', :query)
-    //        AND  (:specialty IS NULL OR medical_specialty = :specialty)
-    //        ORDER BY ts_rank(fts, plainto_tsquery('english', :query)) DESC
-    // listSpecialties() → List<SpecialtyCount>
-    // countAll() → long
+// medicalcase/repository/impl/MedicalCaseRepositoryImpl.java
+@Repository
+public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
+    private final NamedParameterJdbcTemplate jdbc;
+    // SQL via @InjectSql("classpath:sql/medicalcase/...") or inline constants
 }
 ```
 
-### `PgVectorSearchService` — cosine similarity + pre-filter
+### `retrieval` — vector + stats service
 
 ```java
-@Service
-public class PgVectorSearchService {
+// retrieval/service/VectorSearchService.java
+public interface VectorSearchService {
+    List<SemanticMatch> semanticSearch(float[] embedding, String specialty, int topK, double minSimilarity);
+    DatasetStats getDatasetStats();
+}
 
-    // semanticSearch(float[] embedding, String specialty, int topK, double minSimilarity)
-    //   SQL:
-    //     SELECT id, sample_name, description, medical_specialty, keywords, split,
-    //            1 - (embedding <=> :emb::vector) AS similarity
-    //     FROM   medical_case
-    //     WHERE  (:specialty IS NULL OR medical_specialty = :specialty)
-    //       AND  1 - (embedding <=> :emb::vector) >= :minSimilarity
-    //     ORDER  BY embedding <=> :emb::vector   -- use operator for index use
-    //     LIMIT  :topK
+// retrieval/service/impl/VectorSearchServiceImpl.java
+@Service
+public class VectorSearchServiceImpl implements VectorSearchService {
+    private final MedicalCaseRepository repository;
+    // pgvector cosine SQL; stats aggregates via repository
 }
 ```
 
@@ -315,7 +425,7 @@ public class MultiEndpointEmbeddingProperties {
 Port of [`med-expert-match-ce` `EmbeddingEndpointPool`](https://github.com/berdachuk/med-expert-match-ce/blob/main/src/main/java/com/berdachuk/medexpertmatch/embedding/multiendpoint/EmbeddingEndpointPool.java):
 
 ```java
-// medical-mcp-infrastructure/.../embedding/multiendpoint/EmbeddingEndpointPool.java
+// embedding/multiendpoint/EmbeddingEndpointPool.java
 
 // Shared task queue; worker-per-endpoint threads pull batches
 // embed(String) → CompletableFuture<List<Double>>
@@ -345,37 +455,54 @@ public class EmbeddingEndpointPoolConfig {
 }
 ```
 
-### `MedicalEmbeddingService` — delegates to pool
+### `EmbeddingService` — delegates to pool
 
 ```java
+// embedding/service/EmbeddingService.java — public API (same role as med-expert-match-ce)
+public interface EmbeddingService {
+    float[] embedAsFloatArray(String text);
+    List<float[]> embedBatch(List<String> texts);
+    String buildEmbeddingInput(CaseSummary summary);
+}
+
+// embedding/service/impl/EmbeddingServiceImpl.java
 @Service
-public class MedicalEmbeddingService {
-
-    private final EmbeddingEndpointPool pool;  // required dependency — pool always present
-
-    // embed(String text) → float[]           — pool.embed(text).get(timeout)
-    // batchEmbed(List<String>) → List<float[]> — pool.embedBatch(texts), join futures
-    // buildEmbeddingInput(CaseSummary) → "{sampleName}. {description} {keywords}"
+public class EmbeddingServiceImpl implements EmbeddingService {
+    private final EmbeddingEndpointPool pool;  // required — pool always present
+    // embed → pool.embed(text); batch → pool.embedBatch(texts)
 }
 ```
 
-### `DatasetLoader` — CommandLineRunner, idempotent
+### `dataset` — loader service
 
-Runs once at startup; skips if `SELECT COUNT(*) FROM medical_case > 0`.
+```java
+// dataset/service/DatasetLoaderService.java
+public interface DatasetLoaderService {
+    void loadIfEmpty();
+}
+
+// dataset/service/impl/DatasetLoaderServiceImpl.java — CommandLineRunner delegate
+@Service
+public class DatasetLoaderServiceImpl implements DatasetLoaderService {
+    private final MedicalCaseRepository repository;
+    private final EmbeddingService embeddingService;
+    // idempotent COUNT(*) > 0 guard; two-pass load
+}
+```
+
+**Loader flow** (idempotent — skips when `COUNT(*) > 0`):
 
 ```
-Flow:
-  1. Download Parquet from HuggingFace CDN
-     https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial
-     /resolve/main/data/train-*.parquet  (+ test / validation)
-  2. Parse with DuckDB JDBC or Apache Arrow (single dependency)
-  3. Batch INSERT into medical_case (skip embedding column)
-  4. For each row: build embedding input text → call MedicalEmbeddingService
-  5. Batch UPDATE embedding column (50 rows per batch — matches med-expert-match-ce api-batch-size)
-  6. Log progress every 100 rows
-```
+Pass 1:
+  1. Download CSV from HuggingFace (medical_cases_train.csv, medical_cases_validation.csv, medical_cases_test.csv)
+  2. Parse CSV; assign UUID; set split from filename
+  3. Batch INSERT into medical_case (embedding = NULL)
 
-Loader is skippable via property:
+Pass 2:
+  4. For each row: build embedding input → EmbeddingService.buildEmbeddingInput()
+  5. embedBatch via EmbeddingEndpointPool (api-batch-size 50)
+  6. Batch UPDATE embedding column; log progress every 100 rows
+```
 
 ```yaml
 medicalmcp:
@@ -387,15 +514,17 @@ medicalmcp:
 
 ---
 
-## MCP Tools Layer (`medical-mcp-tools`)
+## MCP Layer (`mcp/`)
 
-All beans are `@Component`. Annotation scanner picks them up automatically — no explicit registration.
-
-### `MedicalCaseTools`
+All beans are `@Component`. Inject **service interfaces** (`VectorSearchService`, `EmbeddingService`, `MedicalCaseRepository`) — never impl types.
 
 ```java
 @Component
 public class MedicalCaseTools {
+
+    private final MedicalCaseRepository caseRepository;
+    private final VectorSearchService vectorSearch;
+    private final EmbeddingService embeddingService;
 
     @McpTool(
         name = "search_cases",
@@ -405,8 +534,8 @@ public class MedicalCaseTools {
     List<CaseSummary> searchCases(
         McpSyncRequestContext ctx,
         @McpToolParam(description = "Search terms", required = true) String query,
-        @McpToolParam(description = "Filter by medical specialty (exact match)", required = false) String specialty,
-        @McpToolParam(description = "Filter by dataset split: train | test | validation", required = false) String split,
+        @McpToolParam(description = "Exact medical_specialty label (one of 13 HF classes)", required = false) String specialty,
+        @McpToolParam(description = "Filter by dataset split: train | validation | test", required = false) String split,
         @McpToolParam(description = "Max results (default 10, max 50)", required = false) Integer limit
     );
 
@@ -428,7 +557,7 @@ public class MedicalCaseTools {
     List<SemanticMatch> semanticSearch(
         McpSyncRequestContext ctx,
         @McpToolParam(description = "Free-text query to embed and compare", required = true) String query,
-        @McpToolParam(description = "Pre-filter by medical specialty before ANN search", required = false) String specialty,
+        @McpToolParam(description = "Exact medical_specialty label (one of 13 HF classes)", required = false) String specialty,
         @McpToolParam(description = "Number of results (default 5)", required = false) Integer topK,
         @McpToolParam(description = "Minimum cosine similarity 0–1 (default 0.70)", required = false) Double minSimilarity
     );
@@ -443,7 +572,7 @@ public class MedicalCaseTools {
 
     @McpTool(
         name = "get_dataset_stats",
-        description = "Return dataset statistics: total cases, breakdown by specialty and by split (train/test/validation).",
+        description = "Return dataset statistics: total cases, breakdown by specialty and by split (train/validation/test).",
         annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false)
     )
     DatasetStats getDatasetStats();
@@ -485,31 +614,21 @@ public class MedicalCasePrompts {
 
     @McpPrompt(
         name = "case-analysis",
-        description = "Structured prompt for LLM analysis of a retrieved medical case."
+        description = "Structured prompt for LLM analysis of a medical case (dataset fields only)."
     )
     List<PromptMessage> analyzeCase(
-        @McpArg(name = "caseId",  description = "UUID of the medical case", required = true) String caseId,
-        @McpArg(name = "focus",   description = "Analysis focus: diagnosis | treatment | keywords | summary", required = false) String focus
+        @McpArg(name = "caseId",  description = "Server UUID from search_cases / semantic_search", required = true) String caseId,
+        @McpArg(name = "focus",   description = "Dataset field emphasis: description | transcription | keywords | specialty | all", required = false) String focus
     );
-    // Fetches MedicalCase from DB, injects into prompt template
+    // Loads MedicalCase by UUID; focus maps to HF columns only (no diagnosis/treatment inference)
 }
 ```
 
-### `MedicalCaseCompletions`
-
-```java
-@Component
-public class MedicalCaseCompletions {
-
-    @McpComplete(prompt = "case-analysis")   // completes caseId argument
-    CompleteResponse completeCaseId(String prefix);
-    // SELECT id, sample_name FROM medical_case WHERE sample_name ILIKE :prefix% LIMIT 10
-}
-```
+No `@McpComplete` — `sample_name` is not unique and must not be conflated with `caseId` (UUID).
 
 ---
 
-## Application Configuration (`medical-mcp-app`)
+## Application Configuration (`core/` + `src/main/resources`)
 
 ### `application.yml`
 
@@ -552,7 +671,7 @@ spring:
     mcp:
       server:
         name: medical-mcp-server
-        version: 1.3.0
+        version: 1.5.0
         type: SYNC
         instructions: >
           Wraps the hpe-ai/medical-cases-classification-tutorial dataset (2,464 rows, 13 specialties).
@@ -566,7 +685,7 @@ spring:
           tool: true
           resource: true
           prompt: true
-          completion: true
+          completion: false
         tool-change-notification: false
         resource-change-notification: false
         annotation-scanner:
@@ -619,7 +738,7 @@ medicalmcp:
 logging:
   level:
     com.example.medicalmcp: INFO
-    com.example.medicalmcp.infra.embedding: INFO
+    com.example.medicalmcp.embedding: INFO
     org.springframework.ai.mcp: DEBUG
     org.springframework.ai.openai: INFO
   pattern:
@@ -682,7 +801,7 @@ Same naming convention as `med-expert-match-ce`:
 ```yaml
 services:
   medical-mcp-server:
-    build: ./medical-mcp-app
+    build: .
     ports:
       - "8092:8092"
     environment:
@@ -758,11 +877,11 @@ spring:
 
 | # | Milestone | Key deliverables | Status |
 |---|---|---|---|
-| **M1** | Schema + domain | `V1__init_medical_cases.sql`, domain records (`MedicalCase`, `CaseSummary`, `SemanticMatch`, `SpecialtyCount`, `DatasetStats`), `MedicalMcpApplication` stub | ⬜ |
-| **M2** | Dataset loader pass 1 | `DatasetLoader` (Parquet → JDBC batch insert, `embedding = NULL`), `MedicalCaseRepository` insert only | ⬜ |
-| **M3** | Repositories | `MedicalCaseRepository` (FTS + findById + listSpecialties), `PgVectorSearchService` (cosine), `DatasetStats` query | ⬜ |
-| **M4** | Embedding wiring | `EmbeddingEndpointPool`, `EmbeddingEndpointPoolConfig`, `MedicalEmbeddingService`, loader phase 2, integration test with `pgvector/pgvector:pg17` | ⬜ |
-| **M5** | MCP surface | `MedicalCaseTools` ×5, `MedicalCaseResources` ×2, `MedicalCasePrompts`, `MedicalCaseCompletions` | ⬜ |
+| **M1** | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, `ModulithArchitectureTest`, Boot stub | ⬜ |
+| **M2** | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | ⬜ |
+| **M3** | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats | ⬜ |
+| **M4** | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2, Testcontainers IT | ⬜ |
+| **M5** | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt — interface injection only | ⬜ |
 | **M6** | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.embedding.multi-endpoint` + `medicalmcp.*` properties | ⬜ |
 | **M7** | End-to-end | Claude Desktop smoke test, `McpSyncClient` call from `med-expert-match-ce` | ⬜ |
 | **M8** | Docker + docs | `docker-compose.yml`, `README.md`, startup guide | ⬜ |
@@ -773,7 +892,11 @@ spring:
 
 | Decision | Choice | Rationale |
 |---|---|---|
-| Embedding transport | Always-on `EmbeddingEndpointPool` + manual `OpenAiEmbeddingModel` | Mandatory for all embed paths; ≥1 endpoint required at startup; no Spring AI embedding auto-config |
+| Dataset fidelity | CSV source + exact HF schema | 5 columns only; UUID/split/embedding added server-side |
+| MCP surface | Tools/resources/prompts only | No completions; prompt `focus` maps to dataset columns |
+| Modularity | Spring Modulith package modules | Same pattern as med-expert-match-ce; `verify()` in CI |
+| API surface | Interface in `service/` / `repository/` | Impl in `*/impl/`; MCP layer never touches JDBC |
+| Embedding transport | Always-on `EmbeddingEndpointPool` + manual `OpenAiEmbeddingModel` | Mandatory for all embed paths; ≥1 endpoint required at startup |
 | Embedding model | `nomic-embed-text:v1.5` @ 768 dims | Same as `med-expert-match-ce` — vectors are cross-compatible, no re-embedding needed if DB is shared |
 | Embedding input | `{sampleName}. {description} {keywords}` | Transcription too long for single-vector embedding; FTS covers it instead |
 | ANN index | HNSW (not IVFFlat) | 2,464 rows — HNSW builds in < 1 s, no need for IVFFlat `lists` tuning |
@@ -791,6 +914,6 @@ spring:
 |---|---|
 | `MedicalCase` | `get_case`, resources, prompts |
 | `CaseSummary` | `search_cases`, FTS/vector result bodies |
-| `SemanticMatch` | `semantic_search` — `{ case: CaseSummary, similarity }` |
+| `SemanticMatch` | `semantic_search` — `{ caseSummary: CaseSummary, similarity }` |
 | `SpecialtyCount` | `list_specialties` |
 | `DatasetStats` | `get_dataset_stats`, `medical://stats` resource |

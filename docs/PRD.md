@@ -1,7 +1,7 @@
 # Product Requirements Document
 ## Medical MCP Server (`medical-mcp-server`)
 
-**Version:** 1.3.0  
+**Version:** 1.5.0  
 **Date:** 2026-06-16  
 **Author:** Siarhei Berdachuk  
 **Status:** Draft  
@@ -24,6 +24,7 @@ The server loads the dataset (2,464 rows, ~9 MB) into a PostgreSQL + pgvector da
 | Transport | Spring MVC SSE (SYNC) |
 | Spring Boot | 4.1.0 |
 | Spring AI | 2.0.0 |
+| Spring Modulith | 2.1.0 |
 | JDK | 21 |
 | DB | PostgreSQL 17 + pgvector |
 
@@ -35,25 +36,53 @@ The server loads the dataset (2,464 rows, ~9 MB) into a PostgreSQL + pgvector da
 
 | Property | Value |
 |---|---|
-| Rows | 2,464 |
-| Raw size | 9.04 MB |
-| Parquet size | 4.29 MB |
-| Splits | Pre-split (train / test / validation) |
-| Classification labels | 13 medical specialties |
+| Rows | 2,464 (train 1,724 · validation 370 · test 370) |
+| Total size | 9.04 MB (CSV) |
+| Source format | CSV (`medical_cases_{train,validation,test}.csv`) — Parquet is a HuggingFace viewer conversion only |
+| Splits | `train` \| `validation` \| `test` (HuggingFace config names) |
+| Classification labels | 13 `medical_specialty` values (exact strings) |
 
-### Schema
+### Schema (HuggingFace — 5 columns only)
 
-| Column | Type | Description |
-|---|---|---|
-| `description` | `text` | Short case summary / reason for visit |
-| `transcription` | `text` | Full clinical transcription (procedure notes, HPI, findings, labs, plan) |
-| `sample_name` | `text` | Human-readable case title (e.g. "Pacemaker Interrogation") |
-| `medical_specialty` | `text` | Classification label — 13 distinct values |
-| `keywords` | `text` | Comma-separated clinical keywords |
+Verified via [HuggingFace Datasets API](https://datasets-server.huggingface.co/info?dataset=hpe-ai/medical-cases-classification-tutorial) (2026-06-16). The dataset has **no row id** — the server assigns a UUID on ingest.
 
-### Known specialties (13 classes)
+| Column | HF type | Nullable | Description |
+|---|---|---|---|
+| `description` | `string` | No | Short case summary / reason for visit |
+| `transcription` | `string` | No | Full clinical transcription |
+| `sample_name` | `string` | No | Human-readable case title (not unique — use UUID for lookup) |
+| `medical_specialty` | `string` | No | One of 13 classification labels (exact match required) |
+| `keywords` | `string` | Yes | Comma-separated keywords; **~36 % of rows are null/empty** |
 
-Cardiovascular / Pulmonary, Orthopedic, Nephrology, Obstetrics / Gynecology, and 9 others present in the dataset.
+### `medical_specialty` values (13 — exact strings)
+
+| Label | Rows |
+|---|---|
+| Cardiovascular / Pulmonary | 742 |
+| Orthopedic | 408 |
+| Neurology | 282 |
+| Gastroenterology | 222 |
+| Obstetrics / Gynecology | 182 |
+| Hematology - Oncology | 120 |
+| Neurosurgery | 109 |
+| ENT - Otolaryngology | 80 |
+| Nephrology | 71 |
+| Psychiatry / Psychology | 68 |
+| Ophthalmology | 66 |
+| Pediatrics - Neonatal | 64 |
+| Radiology | 50 |
+
+`list_specialties` returns these labels verbatim. `specialty` filters on tools must use the **exact** label (e.g. `Cardiovascular / Pulmonary`, not `Cardiology`).
+
+### Server-only columns (not in HuggingFace)
+
+| Column | Purpose |
+|---|---|
+| `id` | UUID primary key assigned at load time |
+| `split` | `train` \| `validation` \| `test` — from source file name |
+| `embedding` | `VECTOR(768)` — computed at load pass 2 |
+| `fts` | Generated `tsvector` for full-text search |
+| `created_at` | Ingest timestamp |
 
 ---
 
@@ -68,6 +97,8 @@ Cardiovascular / Pulmonary, Orthopedic, Nephrology, Obstetrics / Gynecology, and
 - Support **full-text search** using `tsvector` on `sample_name`, `description`, `transcription`, and `keywords`
 - Support **specialty-based filtering** (13 classification labels)
 - Be consumable by Claude Desktop and `McpSyncClient` inside `med-expert-match-ce`
+- Use **Spring Modulith** package modules with explicit `allowedDependencies` (same approach as [`med-expert-match-ce`](https://github.com/berdachuk/med-expert-match-ce))
+- Enforce **interface / implementation separation** — public contracts in `service/` and `repository/`; JDBC and framework code only in `impl/` subpackages
 
 ### Non-Goals
 
@@ -119,18 +150,18 @@ medicalmcp:
 
 `EmbeddingEndpointPoolConfig` constructs one `OpenAiEmbeddingModel` per endpoint (OpenAI-compatible / Ollama). URL normalization appends `/v1` when building each model — same helper as `med-expert-match-ce`. Additional Ollama nodes use the same model and dimensions.
 
-**Pool classes** (in `medical-mcp-infrastructure/embedding/`):
+**Pool classes** (in `embedding/`):
 
 | Class | Role |
 |---|---|
 | `MultiEndpointEmbeddingProperties` | `@ConfigurationProperties`; `@NotEmpty` on `endpoints` |
 | `EmbeddingEndpointPoolConfig` | Always-on `@Configuration`; builds pool `@Bean`; throws if no valid endpoints |
 | `EmbeddingEndpointPool` | Worker queue, batch API calls, skip-on-failure |
-| `MedicalEmbeddingService` | `embed` / `batchEmbed` delegate to pool |
+| `EmbeddingService` / `EmbeddingServiceImpl` | `embedAsFloatArray` / `embedBatch` delegate to pool |
 
 Pull on the Ollama host: `ollama pull nomic-embed-text:v1.5`
 
-**Embedding input strategy** — embed `{sampleName}. {description} {keywords}` only. `transcription` is excluded: it exceeds the 512-token context of `nomic-embed-text` and would dilute vector signal. FTS via `tsvector` covers full-text retrieval over `transcription`.
+**Embedding input strategy** — embed `{sampleName}. {description} {keywords}` only; omit `keywords` segment when null/empty. `transcription` is excluded: it exceeds the 512-token context of `nomic-embed-text` and would dilute vector signal. FTS via `tsvector` covers full-text retrieval over `transcription`.
 
 ---
 
@@ -146,7 +177,7 @@ CREATE TABLE medical_case (
     transcription     TEXT,
     medical_specialty VARCHAR(120),
     keywords          TEXT,
-    split             VARCHAR(12),    -- 'train' | 'test' | 'validation'
+    split             VARCHAR(12),    -- 'train' | 'validation' | 'test'
     embedding         VECTOR(768),    -- nomic-embed-text:v1.5 @ 768 dims
     fts               TSVECTOR GENERATED ALWAYS AS (
                           to_tsvector('english',
@@ -181,30 +212,32 @@ CREATE INDEX idx_medical_case_specialty_trgm
 
 ## 6. MCP Surface
 
-### Tools (5 total)
+All endpoints map **only** to dataset fields or server-derived search indexes (FTS, embeddings, UUID, split). No clinical inference endpoints (e.g. diagnosis extraction) — those are out of scope.
+
+### Tools (5)
 
 #### `search_cases`
-Full-text search across `sample_name`, `description`, `transcription`, and `keywords`.
+Full-text search across `sample_name`, `description`, `transcription`, and `keywords` (via generated `fts`).
 
 | Param | Type | Required | Description |
 |---|---|---|---|
 | `query` | String | Yes | Search terms |
-| `specialty` | String | No | Filter by medical specialty (exact match) |
-| `split` | String | No | Filter by dataset split: `train` \| `test` \| `validation` |
+| `specialty` | String | No | Exact `medical_specialty` label — must match one of the 13 values above |
+| `split` | String | No | `train` \| `validation` \| `test` |
 | `limit` | Integer | No | Max results, default 10, max 50 |
 
-Returns: `[{ id, sampleName, description, medicalSpecialty, keywords, split }]`
+Returns: `[{ id, sampleName, description, medicalSpecialty, keywords, split }]` — `CaseSummary` (no `transcription`).
 
 ---
 
 #### `get_case`
-Fetch a single case by UUID, including the full transcription.
+Fetch a single case by server-assigned UUID (from `search_cases`, `semantic_search`, or resources).
 
 | Param | Type | Required |
 |---|---|---|
 | `id` | String (UUID) | Yes |
 
-Returns: full `MedicalCase` record including `transcription`.
+Returns: full `MedicalCase` — all five HF columns plus `id`, `split`, `createdAt`. Includes `transcription`.
 
 ---
 
@@ -214,17 +247,17 @@ Embeds the query via `nomic-embed-text:v1.5` and runs pgvector HNSW cosine simil
 | Param | Type | Required | Description |
 |---|---|---|---|
 | `query` | String | Yes | Free-text query to embed and compare |
-| `specialty` | String | No | Pre-filter by specialty before ANN |
+| `specialty` | String | No | Exact `medical_specialty` pre-filter before ANN |
 | `topK` | Integer | No | Number of results, default 5 |
 | `minSimilarity` | Double | No | Cosine similarity threshold, default 0.70 |
 
-Returns: `SemanticMatch` — `{ case: CaseSummary, similarity }`  
+Returns: `SemanticMatch` — `{ caseSummary: CaseSummary, similarity }`  
 Reports progress via `McpSyncRequestContext` at 0 %, 50 % (after embedding), 100 %.
 
 ---
 
 #### `list_specialties`
-Returns all 13 distinct specialty values with case counts.
+Returns all 13 `medical_specialty` values with row counts (derived from loaded data).
 
 No params. Returns: `[{ specialty, count }]`
 
@@ -233,7 +266,7 @@ No params. Returns: `[{ specialty, count }]`
 #### `get_dataset_stats`
 Returns dataset-level statistics.
 
-No params. Returns: `{ totalCases, bySpecialty: {...}, bySplit: { train, test, validation } }`  
+No params. Returns: `{ totalCases: 2464, bySpecialty: {...}, bySplit: { train: 1724, validation: 370, test: 370 } }`  
 Cached 60 seconds (Caffeine).
 
 ---
@@ -247,23 +280,28 @@ Cached 60 seconds (Caffeine).
 
 ---
 
-### Prompts (1 total)
+### Prompts (1)
 
 #### `case-analysis`
-Prompt template for LLM-driven analysis of a retrieved case. Fetches the full `MedicalCase` from DB and injects it into the template.
+Injects dataset fields from a case into an LLM prompt template. **No completion handler** — obtain `caseId` from `search_cases` or `semantic_search` first (`sample_name` is not unique).
 
 | Arg | Required | Description |
 |---|---|---|
-| `caseId` | Yes | UUID of the case to analyse |
-| `focus` | No | Analysis focus: `diagnosis` \| `treatment` \| `keywords` \| `summary` |
+| `caseId` | Yes | Server UUID of the case |
+| `focus` | No | Which dataset field(s) to emphasize: `description` \| `transcription` \| `keywords` \| `specialty` \| `all` (default) |
 
----
+`focus` values map 1:1 to columns: `description`, `transcription`, `keywords`, `medical_specialty`. When `keywords` is null, the template omits that section.
 
-### Completion (1 total)
+**Not exposed:** MCP completions (`@McpComplete`) — removed; prefix-matching `sample_name` while the arg is named `caseId` is incompatible with the dataset model.
 
-`@McpComplete(prompt="case-analysis")` on `caseId` — prefix-matches `sample_name` from DB and returns UUID hints.
+### MCP capabilities
 
----
+| Capability | Enabled | Notes |
+|---|---|---|
+| tools | yes | 5 tools — all dataset-backed |
+| resources | yes | 2 URIs |
+| prompts | yes | 1 prompt — dataset-field focus only |
+| completion | **no** | Not compatible with UUID-based case identity |
 
 ## 7. Data Loading
 
@@ -272,15 +310,15 @@ Dataset loaded **once at startup** via `CommandLineRunner`. Skipped if `SELECT C
 **Two-pass loading:**
 
 **Pass 1 — Insert rows (no embeddings)**
-1. Download Parquet files from HuggingFace CDN (train / test / validation splits)
-2. Parse Parquet (DuckDB JDBC or Apache Arrow)
-3. Batch INSERT into `medical_case` with `embedding = NULL`
+1. Download CSV files from HuggingFace (`medical_cases_train.csv`, `medical_cases_validation.csv`, `medical_cases_test.csv`)
+2. Parse CSV (OpenCSV, Apache Commons CSV, or HuggingFace `datasets` library)
+3. Assign UUID per row; set `split` from source file; batch INSERT with `embedding = NULL`
 
 → Dataset is immediately queryable via FTS and specialty filter after pass 1.
 
 **Pass 2 — Backfill embeddings**
 4. For each row: build embedding text → `{sampleName}. {description} {keywords}`
-5. Call `MedicalEmbeddingService` → `float[768]` via `EmbeddingEndpointPool` (`api-batch-size` 50)
+5. Call `EmbeddingService` → `float[768]` via `EmbeddingEndpointPool` (`api-batch-size` 50)
 6. Batch UPDATE `embedding` column — 50 rows per batch (matches `med-expert-match-ce` api-batch-size)
 7. Log progress every 100 rows
 
@@ -308,29 +346,101 @@ medicalmcp:
 | Full initial load incl. embedding generation | Depends on Ollama throughput |
 | JDBC only | No JPA/Hibernate — `NamedParameterJdbcTemplate` throughout |
 | Embedding pool | `medicalmcp.embedding.multi-endpoint.endpoints` must contain ≥1 valid URL; fail fast at startup |
+| Modularity | `ApplicationModules.of(...).verify()` passes — no illegal cross-module references |
 
 ---
 
-## 9. Project Structure
+## 9. Architecture (Spring Modulith)
+
+Single deployable Spring Boot application using **package-based modules** ([`med-expert-match-ce` pattern](https://github.com/berdachuk/med-expert-match-ce)). Each module has a `package-info.java` annotated with `@ApplicationModule(allowedDependencies = …)` declaring its dependency graph. Modulith verification runs in CI (`mvn verify`).
+
+### Package modules
+
+```
+src/main/java/com/example/medicalmcp/
+├── MedicalMcpApplication.java
+├── core/              # Shared config, exception, health, util — no feature deps
+├── medicalcase/       # Domain records, repository API + JDBC impl
+├── embedding/         # EmbeddingService API, pool, config, impl
+├── retrieval/         # FTS, pgvector search, dataset stats
+├── dataset/           # CSV loader (CommandLineRunner)
+├── mcp/               # @McpTool / @McpResource / @McpPrompt
+└── system/            # Actuator health indicators (optional)
+```
+
+### Interface / implementation rules
+
+Mirror [`med-expert-match-ce`](https://github.com/berdachuk/med-expert-match-ce/tree/main/src/main/java/com/berdachuk/medexpertmatch):
+
+| Layer | Public API (inject this) | Implementation |
+|---|---|---|
+| Repository | `{module}/repository/XxxRepository.java` | `{module}/repository/impl/XxxRepositoryImpl.java` |
+| Service | `{module}/service/XxxService.java` | `{module}/service/impl/XxxServiceImpl.java` |
+| MCP adapters | `mcp/*Tools.java`, `mcp/*Resources.java`, … | Delegates to service interfaces only — no JDBC in MCP layer |
+
+- `@Repository` / `@Service` on **impl** classes only; interfaces have no Spring stereotypes
+- Callers (MCP tools, other modules) depend on **interfaces**, never impl types
+- SQL in `src/main/resources/sql/{module}/` (optional; same `@InjectSql` pattern as med-expert-match-ce)
+
+### Module dependency graph
+
+```
+mcp          → core, medicalcase, retrieval, embedding, dataset
+dataset      → core, medicalcase, embedding
+retrieval    → core, medicalcase, embedding
+embedding    → core
+medicalcase  → core
+system       → core, embedding
+```
+
+---
+
+## 10. Project Layout
 
 ```
 medical-mcp-server/
-├── pom.xml                          # Parent BOM aggregator
-├── medical-mcp-domain/              # Java 21 records, zero framework deps
-├── medical-mcp-infrastructure/      # JDBC repos, pgvector, Flyway, dataset loader, embedding pool
-│   └── embedding/                   # EmbeddingEndpointPool + config (port from med-expert-match-ce)
-├── medical-mcp-tools/               # @McpTool / @McpResource / @McpPrompt beans
-└── medical-mcp-app/                 # Spring Boot entry point, security, application.yml
+├── pom.xml                          # Single module; Spring Modulith + Spring AI BOM
+├── docker-compose.yml
+├── Dockerfile
+└── src/
+    ├── main/
+    │   ├── java/com/example/medicalmcp/
+    │   │   ├── MedicalMcpApplication.java
+    │   │   ├── core/                # SecurityConfig, shared @Configuration
+    │   │   ├── medicalcase/
+    │   │   │   ├── domain/          # MedicalCase, CaseSummary, SemanticMatch, …
+    │   │   │   ├── repository/
+    │   │   │   ├── repository/impl/
+    │   │   │   └── package-info.java
+    │   │   ├── embedding/
+    │   │   │   ├── service/
+    │   │   │   ├── service/impl/
+    │   │   │   ├── multiendpoint/
+    │   │   │   ├── config/
+    │   │   │   └── package-info.java
+    │   │   ├── retrieval/
+    │   │   ├── dataset/
+    │   │   ├── mcp/
+    │   │   └── system/              # EmbeddingPoolHealthIndicator (optional)
+    │   └── resources/
+    │       ├── application.yml
+    │       ├── db/migration/        # V1__init_medical_cases.sql
+    │       └── sql/                 # optional per-module SQL (@InjectSql)
+    └── test/java/com/example/medicalmcp/
+        └── ModulithArchitectureTest.java
 ```
 
 ---
 
-## 10. Key Dependencies
+## 11. Key Dependencies
 
 | Dependency | Version | Notes |
 |---|---|---|
 | Spring Boot | 4.1.0 | Aligned with `med-expert-match-ce` |
 | Spring AI BOM | 2.0.0 | |
+| Spring Modulith BOM | 2.1.0 | Package module boundaries (aligned with med-expert-match-ce) |
+| `spring-modulith-core` | 2.1.0 | `@ApplicationModule`, verification API |
+| `spring-modulith-starter-test` | 2.1.0 | `ApplicationModuleTest` / `verify()` in CI |
 | `spring-ai-starter-mcp-server-webmvc` | 2.0.0 | SSE transport |
 | `spring-ai-openai` | 2.0.0 | Manual `OpenAiEmbeddingModel` in embedding pool (no auto-config) |
 | `postgresql` | 42.7.11 | Aligned with `med-expert-match-ce` |
@@ -344,7 +454,7 @@ medical-mcp-server/
 
 ---
 
-## 11. Configuration
+## 12. Configuration
 
 ```yaml
 spring:
@@ -379,7 +489,7 @@ spring:
     mcp:
       server:
         name: medical-mcp-server
-        version: 1.3.0
+        version: 1.5.0
         type: SYNC
         instructions: >
           Wraps hpe-ai/medical-cases-classification-tutorial (2,464 rows, 13 specialties).
@@ -393,7 +503,7 @@ spring:
           tool: true
           resource: true
           prompt: true
-          completion: true
+          completion: false
         annotation-scanner:
           enabled: true
 
@@ -436,7 +546,7 @@ management:
 
 ---
 
-## 12. Environment Variables
+## 13. Environment Variables
 
 Same naming convention as `med-expert-match-ce`:
 
@@ -463,37 +573,45 @@ Same naming convention as `med-expert-match-ce`:
 
 ---
 
-## 13. Milestones
+## 14. Milestones
 
 | # | Milestone | Key deliverables | Status |
 |---|---|---|---|
-| M1 | Schema + domain | `V1__init_medical_cases.sql`, domain records (`MedicalCase`, `CaseSummary`, `SemanticMatch`, `SpecialtyCount`, `DatasetStats`), Boot stub | ⬜ |
-| M2 | Dataset loader pass 1 | `DatasetLoader` (Parquet → JDBC batch insert, `embedding = NULL`), `MedicalCaseRepository` inserts | ⬜ |
-| M3 | Repositories | `MedicalCaseRepository` (FTS, findById, listSpecialties), `PgVectorSearchService` (cosine), stats query | ⬜ |
-| M4 | Embedding wiring | `EmbeddingEndpointPool`, `EmbeddingEndpointPoolConfig`, `MedicalEmbeddingService`, loader pass 2, Testcontainers IT | ⬜ |
-| M5 | MCP surface | `MedicalCaseTools` ×5, `MedicalCaseResources` ×2, `MedicalCasePrompts`, `MedicalCaseCompletions` | ⬜ |
-| M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine stats cache, `medicalmcp.*` properties | ⬜ |
+| M1 | Schema + modulith foundation | `V1__init_medical_cases.sql`, domain records, `package-info.java` per module, `ModulithArchitectureTest`, Boot stub | ⬜ |
+| M2 | Dataset loader pass 1 | `DatasetLoaderService` + impl, `MedicalCaseRepository` + impl (insert), CSV → JDBC | ⬜ |
+| M3 | Retrieval module | `MedicalCaseRepository` (FTS, findById, listSpecialties), `VectorSearchService` + impl, stats query | ⬜ |
+| M4 | Embedding module | `EmbeddingService` + impl, `EmbeddingEndpointPool`, loader pass 2, Testcontainers IT | ⬜ |
+| M5 | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt — interface injection only | ⬜ |
+| M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.embedding.multi-endpoint` + `medicalmcp.*` properties | ⬜ |
 | M7 | End-to-end | Claude Desktop smoke test, `McpSyncClient` call from `med-expert-match-ce` | ⬜ |
 | M8 | Docker + docs | `docker-compose.yml`, `README.md`, startup guide | ⬜ |
 
 ---
 
-## 14. Docker Compose
+## 15. Docker Compose
 
 ```yaml
 services:
   medical-mcp-server:
-    build: ./medical-mcp-app
+    build: .
     ports:
       - "8092:8092"
     environment:
       MEDICALMCP_DB_HOST: postgres
+      MEDICALMCP_DB_USERNAME: medical_mcp
+      MEDICALMCP_DB_PASSWORD: medical_mcp
       EMBEDDING_BASE_URL: http://host.docker.internal:11434
+      EMBEDDING_API_KEY: none
       EMBEDDING_MODEL: nomic-embed-text:v1.5
       EMBEDDING_DIMENSIONS: 768
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   postgres:
     image: pgvector/pgvector:pg17
@@ -501,13 +619,23 @@ services:
       POSTGRES_DB: medical_mcp
       POSTGRES_USER: medical_mcp
       POSTGRES_PASSWORD: medical_mcp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medical_mcp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
 ```
 
 Ollama runs on the host (`host.docker.internal:11434`), not in Docker.
 
 ---
 
-## 15. MCP Client Connection
+## 16. MCP Client Connection
 
 **Claude Desktop** — `~/.config/claude/claude_desktop_config.json`:
 
@@ -528,4 +656,5 @@ Ollama runs on the host (`host.docker.internal:11434`), not in Docker.
 
 ## Related documentation
 
+- [docs/README.md](README.md) — documentation index
 - [PLAN.md](PLAN.md) — architecture, class-level design, implementation milestones
