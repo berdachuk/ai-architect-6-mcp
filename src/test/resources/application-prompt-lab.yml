@@ -1,0 +1,10 @@
+medicalmcp:
+  prompt-lab:
+    enabled: true
+    eval-split: validation
+    min-accuracy: 0.55
+  dataset:
+    loader:
+      enabled: false
+      sources:
+        - classpath:dataset/validation-sample-10.csv

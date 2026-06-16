@@ -1,5 +1,6 @@
 package com.example.medicalmcp.mcp;
 
+import com.example.medicalmcp.core.prompt.PromotedSpecialtyClassificationInstructions;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import io.modelcontextprotocol.spec.McpSchema.GetPromptResult;
@@ -63,7 +64,7 @@ public class MedicalCasePrompts {
             case "description" -> appendDescription(message, medicalCase);
             case "transcription" -> appendTranscription(message, medicalCase);
             case "keywords" -> appendKeywords(message, medicalCase);
-            case "specialty" -> appendSpecialty(message, medicalCase);
+            case "specialty" -> appendSpecialtyAnalysis(message, medicalCase);
             default -> {
                 appendSpecialty(message, medicalCase);
                 appendDescription(message, medicalCase);
@@ -72,8 +73,18 @@ public class MedicalCasePrompts {
             }
         }
 
-        message.append("\nProvide a structured summary using only the fields above. Do not invent clinical facts.");
+        if (!"specialty".equals(focus)) {
+            message.append("\nProvide a structured summary using only the fields above. Do not invent clinical facts.");
+        }
         return message.toString();
+    }
+
+    private static void appendSpecialtyAnalysis(StringBuilder message, MedicalCase medicalCase) {
+        appendDescription(message, medicalCase);
+        appendTranscription(message, medicalCase);
+        appendKeywords(message, medicalCase);
+        appendSpecialty(message, medicalCase);
+        message.append('\n').append(PromotedSpecialtyClassificationInstructions.classificationBlock());
     }
 
     private static void appendDescription(StringBuilder message, MedicalCase medicalCase) {

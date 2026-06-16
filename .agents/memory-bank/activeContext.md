@@ -4,19 +4,13 @@
 
 ## Current focus
 
-**M8 complete.** Next optional: **M9** prompt lab. Plan: [.agents/plans/M-10-prompt-lab.md](../plans/M-10-prompt-lab.md).
+**User guides complete** — [docs/guides/README.md](../../docs/guides/README.md) (MCP, prompt-lab, Claude Desktop, LM Studio).
 
-Core milestone track (M1–M8) is complete. M9/M10 are optional per [docs/01-requirements.md §18](../../docs/01-requirements.md#18-future-scope-optional).
+**Active plan:** **M-12** — meta-prompting lab ([plan](../plans/M-12-meta-prompting-lab.md)): live LLM eval, `PromptLabTools` MCP under `prompt-lab` profile.
 
-## Next steps (optional M9)
-
-1. `prompt-lab` Maven profile scaffold
-2. Offline eval harness for `case-analysis` template variants
-3. Metrics alongside `quality-report.json`
+Core track M1–M8 and optional M9–M10 are complete.
 
 ## Verified
 
-- Docker Compose + `Dockerfile`; GitHub Actions CI + nightly quality workflow (M8)
-- `RetrievalQualityGateIntegrationTest` + `target/test-output/quality-report.json`
-- `McpSseSmokeIntegrationTest` (M7); config/security (M6); MCP surface (M5)
-- `mvn verify -Pintegration` / `-Pquality` via WSL
+- Claude Desktop + LM Studio manual test guides shipped
+- Default MCP surface: 5 tools, 2 resources, 1 prompt

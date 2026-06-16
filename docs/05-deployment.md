@@ -234,6 +234,8 @@ volumes:
 }
 ```
 
+Step-by-step smoke test: [guides/claude-desktop-mcp.md](guides/claude-desktop-mcp.md).
+
 ### `med-expert-match-ce` (`application.yml`)
 
 ```yaml
@@ -246,6 +248,22 @@ spring:
             medical-dataset:
               url: http://localhost:8092/sse
 ```
+
+### LM Studio (`%USERPROFILE%\.lmstudio\mcp.json` on Windows)
+
+```json
+{
+  "mcpServers": {
+    "medical-mcp-server": {
+      "url": "http://localhost:8092/sse"
+    }
+  }
+}
+```
+
+Enable **Developer → Allow remote MCP** in LM Studio (≥ 0.3.17). Step-by-step smoke test: [guides/lm-studio-mcp-manual-test.md](guides/lm-studio-mcp-manual-test.md).
+
+User guides index: [guides/README.md](guides/README.md).
 
 ---
 

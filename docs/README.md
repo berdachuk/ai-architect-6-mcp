@@ -21,6 +21,7 @@ Software documentation for project generation, development, and testing. Read in
 
 | Document | Use for |
 |---|---|
+| [guides/README.md](guides/README.md) | **User guides** — MCP, prompt-lab, LM Studio manual testing |
 | [use-cases.md](use-cases.md) | Actors, workflows, per-tool scenarios, out-of-scope list |
 | [ai-context-strategy.md](ai-context-strategy.md) | AI agent context layers (skills, memory bank) |
 | [../AGENTS.md](../AGENTS.md) | Root agent index (repo root) |
@@ -37,6 +38,7 @@ Software documentation for project generation, development, and testing. Read in
 | Testing & quality gates | [01-requirements §17](01-requirements.md#17-testing--quality-assurance) · [04-testing](04-testing.md) |
 | Environment variables | [01-requirements §13](01-requirements.md#13-environment-variables) · [05-deployment](05-deployment.md) |
 | Future prompt-lab (M9/M10) | [01-requirements §18](01-requirements.md#18-future-scope-optional) |
+| End-user how-to guides | [guides/README.md](guides/README.md) |
 
 ## For AI / codegen agents
 

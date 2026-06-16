@@ -16,6 +16,7 @@ Full index and reading order: **[docs/README.md](docs/README.md)**
 | 3 | [04-testing.md](docs/04-testing.md) | Test plan |
 | 4 | [05-deployment.md](docs/05-deployment.md) | Deployment & operations |
 | + | [use-cases.md](docs/use-cases.md) | Use case catalog |
+| + | [guides/README.md](docs/guides/README.md) | User guides — MCP, prompt-lab, LM Studio |
 | + | [AGENTS.md](AGENTS.md) | AI agent index — skills, memory bank, module guides |
 
 ## Dataset (verified 2026-06-16)
@@ -111,6 +112,7 @@ mvn spring-boot:run
 | Integration (Testcontainers) | `mvn verify -Pintegration` |
 | E2E smoke (SSE client) | `mvn verify -Pe2e` |
 | Quality gate (test split) | `mvn verify -Pquality` |
+| Prompt lab (offline eval) | `mvn verify -Pprompt-lab` |
 
 Full deployment guide: [docs/05-deployment.md](docs/05-deployment.md)
 

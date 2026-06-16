@@ -138,7 +138,7 @@ This document lists **all supported use cases** for the MCP server. Each maps to
 | UC-P02 | Summary-only analysis | Claude user | `caseId`, `focus=description` | Emphasize short visit summary |
 | UC-P03 | Deep note review | med-expert-match-ce | `caseId`, `focus=transcription` | Full procedure / HPI text for expert matching context |
 | UC-P04 | Keyword-focused review | Evaluator | `caseId`, `focus=keywords` | Template omits section when `keywords` is null |
-| UC-P05 | Specialty classification study | Developer | `caseId`, `focus=specialty` | Discuss `medical_specialty` label vs case content |
+| UC-P05 | Specialty classification study | Developer | `caseId`, `focus=specialty` | Case text + promoted `react_self_reflection` block (`PREDICTED_LABEL` contract) |
 | UC-P06 | Search → analyze pipeline | Any | UUID from UC-T13 | `search_cases` / `semantic_search` → `case-analysis` |
 
 **Precondition:** `caseId` is server UUID from a prior tool call (no autocomplete — completions disabled).

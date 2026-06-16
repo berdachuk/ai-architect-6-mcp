@@ -228,5 +228,24 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>prompt-lab</id>
+            <properties>
+                <spring.profiles.active>test,prompt-lab</spring.profiles.active>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/integration/promptlab/*IntegrationTest.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

@@ -71,11 +71,36 @@
 - README Docker Compose quick start
 - **NFR-001, REQ-006** · plan archived: `M-09-docker-quality-gate.md`
 
+## 2026-06-16 — M9 Prompt lab (optional)
+
+- `promptlab` module: label normalizer, evaluator, template library, offline simulator
+- `mvn verify -Pprompt-lab`; metrics merged into `quality-report.json`
+- **REQ §18** · plan archived: `M-10-prompt-lab.md`
+
+## 2026-06-16 — M10 Prompt integration (optional)
+
+- `core/prompt/PromotedSpecialtyClassificationInstructions` — shared `react_self_reflection` winner
+- `MedicalCasePrompts` — `focus=specialty` injects promoted block + case text fields
+- Tests: `MedicalCasePromptsStructureTest`, extended `McpToolsContractIntegrationTest`
+- **REQ §18** · plan archived: `M-11-prompt-integration.md`
+
+## 2026-06-16 — M13 User guides (docs)
+
+- `docs/guides/` — MCP user guide, prompt-lab guide, LM Studio manual test
+- Linked from `docs/README.md`, root `README.md`, `05-deployment.md`
+- Plan archived: `M-13-user-guides.md`
+
+## 2026-06-16 — M14 Claude Desktop guide (docs)
+
+- `docs/guides/claude-desktop-mcp.md` — config, smoke checklist, Windows MSIX notes
+- Plan archived: `M-14-claude-desktop-mcp.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
 | M1–M8 | ✅ Complete |
-| M9–M10 | ⬜ Optional (future) |
+| M9–M10 | ✅ Complete (optional) |
+| M9 ext (M-12) | ⬜ Optional (meta-prompting lab) |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

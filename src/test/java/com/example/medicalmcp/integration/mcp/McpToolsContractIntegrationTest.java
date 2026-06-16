@@ -2,6 +2,7 @@ package com.example.medicalmcp.integration.mcp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.medicalmcp.core.prompt.PromotedSpecialtyClassificationInstructions;
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
 import com.example.medicalmcp.mcp.MedicalCasePrompts;
 import com.example.medicalmcp.mcp.MedicalCaseTools;
@@ -125,5 +126,38 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
         String text = ((TextContent) prompt.messages().getFirst().content()).text();
         assertThat(text).contains("Transcription:");
         assertThat(text).doesNotContain("null");
+        assertThat(text).doesNotContain("PREDICTED_LABEL:");
+    }
+
+    @Test
+    void caseAnalysisPromptAllFocusModesReturnStructuredTemplate() {
+        UUID id = medicalCaseTools
+                .searchCases("Pacemaker Interrogation", null, null, 1)
+                .getFirst()
+                .id();
+
+        for (String focus : List.of("description", "transcription", "keywords", "specialty", "all", null)) {
+            GetPromptResult prompt = medicalCasePrompts.analyzeCase(id.toString(), focus);
+            assertThat(prompt.messages()).hasSize(1);
+            String text = ((TextContent) prompt.messages().getFirst().content()).text();
+            assertThat(text).contains("Case ID:");
+            assertThat(text).doesNotContain("null");
+        }
+    }
+
+    @Test
+    void caseAnalysisPromptSpecialtyFocusIncludesPromotedTemplate() {
+        UUID id = medicalCaseTools
+                .searchCases("Pacemaker Interrogation", null, null, 1)
+                .getFirst()
+                .id();
+
+        GetPromptResult prompt = medicalCasePrompts.analyzeCase(id.toString(), "specialty");
+        String text = ((TextContent) prompt.messages().getFirst().content()).text();
+
+        assertThat(text).contains("Description:");
+        assertThat(text).contains("Transcription:");
+        assertThat(text).contains("Medical specialty:");
+        assertThat(text).contains(PromotedSpecialtyClassificationInstructions.classificationBlock());
     }
 }
