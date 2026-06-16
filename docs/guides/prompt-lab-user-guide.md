@@ -79,7 +79,23 @@ Default profile (**no** `prompt-lab`) keeps the production surface: 5 tools, 2 r
 
 ### Classification client
 
-CI and default `prompt-lab` runs use an **offline stub classifier** (`OfflinePromptLabClassificationClient`). Live Ollama/OpenAI chat wiring is optional future work — enable `medicalmcp.prompt-lab.chat.enabled` when implemented.
+| Mode | Property | Client |
+|---|---|---|
+| CI / offline (default) | `medicalmcp.prompt-lab.chat.enabled=false` | `OfflinePromptLabClassificationClient` — deterministic stub (`bad` → poor output, others → accurate) |
+| Live eval | `medicalmcp.prompt-lab.chat.enabled=true` | `ChatPromptLabClassificationClient` — Ollama or OpenAI-compatible chat via Spring AI `OpenAiChatModel` |
+
+Offline mode is the default in `application-prompt-lab.yml` and CI. Live mode requires a running chat endpoint (typically Ollama on `:11434`).
+
+```yaml
+medicalmcp:
+  prompt-lab:
+    chat:
+      enabled: true
+      base-url: http://localhost:11434
+      model: llama3.2
+```
+
+The chat client appends `/v1` to the base URL when missing (same convention as the embedding pool).
 
 ---
 
@@ -91,15 +107,20 @@ From the project root (use **WSL** on Windows for Docker/Testcontainers):
 mvn verify -Pprompt-lab
 ```
 
-### What runs
+Runs `PromptLabOfflineEvalIntegrationTest`, `PromptLabToolsIntegrationTest`, and `PromptLabGateIntegrationTest` (tag `prompt-lab`):
 
-`PromptLabOfflineEvalIntegrationTest` and `PromptLabToolsIntegrationTest` (tag `prompt-lab`):
-
-1. Loads `validation-sample-10.csv` fixture into Postgres
+1. Loads fixture CSV into Postgres (`validation-sample-10.csv` by default; gate IT uses `test-sample-10.csv`)
 2. Evaluates `react_self_reflection` with an accurate offline simulator → **expects gate pass**
 3. Evaluates `bad` with a poor simulator → **expects gate fail**
+4. Gates `react_self_reflection` on the **test** split via `gate_specialty_prompt`
 
-This proves the harness and gate wiring without calling a live chat model.
+To run retrieval and prompt-lab gates together:
+
+```bash
+mvn verify -Pprompt-lab-quality
+```
+
+(`-Pquality -Pprompt-lab` overrides Failsafe includes — use `-Pprompt-lab-quality` instead.)
 
 ### Gate configuration
 
@@ -107,6 +128,9 @@ This proves the harness and gate wiring without calling a live chat model.
 |---|---|---|
 | `medicalmcp.prompt-lab.eval-split` | `validation` | Split used for eval rows |
 | `medicalmcp.prompt-lab.min-accuracy` | `0.55` | Minimum accuracy to pass gate |
+| `medicalmcp.prompt-lab.chat.enabled` | `false` | Use live chat model for eval MCP tools |
+| `medicalmcp.prompt-lab.chat.base-url` | `http://localhost:11434` | Ollama / OpenAI-compatible chat base URL |
+| `medicalmcp.prompt-lab.chat.model` | `llama3.2` | Chat model name for live eval |
 
 ---
 

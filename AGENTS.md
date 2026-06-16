@@ -34,6 +34,8 @@ Spring AI 2.0 MCP server over the [HPE medical cases dataset](https://huggingfac
 | `mvn test` | Unit + Modulith (`ModulithArchitectureTest`) |
 | `mvn verify -Pintegration` | + Testcontainers IT |
 | `mvn verify -Pquality` | + test-split retrieval benchmarks |
+| `mvn verify -Pprompt-lab` | + prompt-lab eval + gate IT |
+| `mvn verify -Pprompt-lab-quality` | + retrieval and prompt-lab test-split gates |
 | `mvn spring-boot:run` | Local server `:8092/sse` |
 
 > **Windows:** run Maven and Docker/Testcontainers from **WSL** — see [techContext.md](.agents/memory-bank/techContext.md).
@@ -105,4 +107,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M-12 meta-prompting lab complete. Optional M-15 live chat next ([M-15 plan](.agents/plans/M-15-prompt-lab-live-chat.md)). User guides: [docs/guides/README.md](docs/guides/README.md).
+**Current status:** M-15 prompt-lab live chat complete. Optional M-16 CI combined gates next ([M-16 plan](.agents/plans/M-16-ci-combined-quality-gates.md)). User guides: [docs/guides/README.md](docs/guides/README.md).
