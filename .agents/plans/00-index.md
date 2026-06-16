@@ -44,5 +44,5 @@ Completed plans are moved to `archive/` when no longer active.
 
 | Plan | Milestone | Reference |
 |---|---|---|
-| M-10 prompt-lab | M9 | [M-10-prompt-lab.md](M-10-prompt-lab.md) |
+| M-10 prompt-lab | M9 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) |
 | M-11 prompt integration | M10 | [M-11-prompt-integration.md](M-11-prompt-integration.md) |
