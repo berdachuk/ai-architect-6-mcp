@@ -104,4 +104,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M4 complete — M5 MCP module next ([M-06 plan](.agents/plans/M-06-mcp-module.md)).
+**Current status:** M5 complete — M6 config/security next ([M-07 plan](.agents/plans/M-07-config-security.md)).

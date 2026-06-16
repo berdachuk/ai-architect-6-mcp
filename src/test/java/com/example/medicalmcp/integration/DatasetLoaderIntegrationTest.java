@@ -5,11 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
-import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
@@ -25,25 +22,17 @@ class DatasetLoaderIntegrationTest extends AbstractPostgresIntegrationTest {
     @Autowired
     private MedicalCaseRepository medicalCaseRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void cleanTable() {
-        jdbcTemplate.update("DELETE FROM medical_case");
-    }
-
     @Test
     void loadsTrainSampleWithAssignedUuids() {
         datasetLoaderService.loadIfEmpty();
 
         assertThat(medicalCaseRepository.countAll()).isEqualTo(10);
 
-        UUID id = jdbcTemplate.queryForObject("SELECT id FROM medical_case LIMIT 1", UUID.class);
-        assertThat(id).isNotNull();
+        var summary =
+                medicalCaseRepository.fullTextSearch("Pacemaker Interrogation", null, null, 1).getFirst();
+        MedicalCase loaded = medicalCaseRepository.findById(summary.id()).orElseThrow();
 
-        MedicalCase loaded = medicalCaseRepository.findById(id).orElseThrow();
-        assertThat(loaded.id()).isEqualTo(id);
+        assertThat(loaded.id()).isEqualTo(summary.id());
         assertThat(loaded.split()).isEqualTo("train");
         assertThat(loaded.sampleName()).isNotBlank();
         assertThat(loaded.description()).isNotBlank();

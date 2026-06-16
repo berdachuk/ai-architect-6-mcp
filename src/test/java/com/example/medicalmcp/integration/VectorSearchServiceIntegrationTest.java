@@ -5,11 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
+import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
@@ -26,11 +26,10 @@ class VectorSearchServiceIntegrationTest extends AbstractPostgresIntegrationTest
     private VectorSearchService vectorSearchService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MedicalCaseRepository medicalCaseRepository;
 
     @BeforeEach
     void loadFixture() {
-        jdbcTemplate.update("DELETE FROM medical_case");
         datasetLoaderService.loadIfEmpty();
     }
 

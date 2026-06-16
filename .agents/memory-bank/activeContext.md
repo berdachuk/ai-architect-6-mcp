@@ -4,16 +4,17 @@
 
 ## Current focus
 
-**M4 complete.** Next: **M5** — MCP tools, resources, `case-analysis` prompt. Plan: [.agents/plans/M-06-mcp-module.md](../plans/M-06-mcp-module.md).
+**M5 complete.** Next: **M6** — config binding, security, cache TTL refinement. Plan: [.agents/plans/M-07-config-security.md](../plans/M-07-config-security.md).
 
 ## Next steps
 
-1. Implement `MedicalCaseTools` (5 tools)
-2. Implement `MedicalCaseResources` + `MedicalCasePrompts`
-3. MCP contract integration tests
+1. `@ConfigurationProperties` for `medicalmcp.*`
+2. `SecurityConfig` — actuator scope
+3. Externalize stats cache TTL + binding tests
 
 ## Verified
 
-- `@InjectSql` external SQL + named binds (DEC-010/011)
-- `EmbeddingEndpointPool` + loader pass 2 + semantic search (M4)
-- Integration tests via WSL + Docker
+- MCP tools (5), resources (2), `case-analysis` prompt (M5)
+- `@InjectSql` in `repository/impl` only; IT `@Sql` cleanup (DEC-010/011)
+- `SharedPostgresContainer` + `@Testcontainers` (DEC-009)
+- `mvn verify -Pintegration` via WSL

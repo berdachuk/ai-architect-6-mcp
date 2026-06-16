@@ -99,7 +99,7 @@ ADR-style log. Full rationale in linked docs where applicable.
 | Convention | `@InjectSql("/sql/medicalcase/findById.sql") String findByIdSql;` on `String` fields in `*/repository/impl/*`; annotation + `SqlInjectBeanPostProcessor` in `core` |
 | Source | [med-expert-match-ce `@InjectSql`](https://github.com/berdachuk/med-expert-match-ce/blob/main/src/main/java/com/berdachuk/medexpertmatch/core/repository/sql/InjectSql.java) |
 
-> **Note:** M2–M3 repository code still uses inline SQL constants — migrate to external files when touching those queries.
+> **Note:** `@InjectSql` applies only to `*/repository/impl/*`. Integration test cleanup uses Spring `@Sql` with scripts from `src/main/resources/sql/{module}/`.
 
 ## DEC-011 — Named bind variables in SQL
 

@@ -103,7 +103,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
 
     @Override
     public long countAll() {
-        Long count = jdbc.getJdbcTemplate().queryForObject(countAllSql, Long.class);
+        Long count = jdbc.queryForObject(countAllSql, Map.of(), Long.class);
         return count == null ? 0L : count;
     }
 

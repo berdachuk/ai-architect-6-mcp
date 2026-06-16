@@ -9,12 +9,12 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-03-dataset-loader.md](archive/M-03-dataset-loader.md) | M2 | ✅ Archived |
 | [archive/M-04-retrieval-module.md](archive/M-04-retrieval-module.md) | M3 | ✅ Archived |
 | [archive/M-05-embedding-module.md](archive/M-05-embedding-module.md) | M4 | ✅ Archived |
-| [M-06-mcp-module.md](M-06-mcp-module.md) | M5 | ⬜ **Active** |
-| [M-07-config-security.md](M-07-config-security.md) | M6 | ⬜ Planned |
+| [archive/M-06-mcp-module.md](archive/M-06-mcp-module.md) | M5 | ✅ Archived |
+| [M-07-config-security.md](M-07-config-security.md) | M6 | ⬜ **Active** |
 | [M-08-e2e-smoke.md](M-08-e2e-smoke.md) | M7 | ⬜ Planned |
 | [M-09-docker-quality-gate.md](M-09-docker-quality-gate.md) | M8 | ⬜ Planned |
 
-**Chain:** M-06 → M-07 → M-08 → M-09
+**Chain:** M-07 → M-08 → M-09
 
 Completed plans are moved to `archive/` when no longer active.
 
@@ -30,6 +30,7 @@ Completed plans are moved to `archive/` when no longer active.
 - Injection: `@InjectSql("/sql/medicalcase/findById.sql") String findByIdSql;` in `*/repository/impl/*`
 - Binds: **`:name` only** — no positional `?`; optional filters via `COALESCE(:param, '')` in SQL, not Java string building
 - Infra: `InjectSql` + `SqlInjectBeanPostProcessor` in `core`
+- IT cleanup: Spring `@Sql` scripts (not repository API)
 
 ### Tests ([DEC-009](../memory-bank/decisions.md#dec-009--wsl-for-docker-on-windows))
 

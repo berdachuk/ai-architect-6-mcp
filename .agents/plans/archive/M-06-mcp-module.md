@@ -1,6 +1,6 @@
 # M-06 — MCP module (M5)
 
-**Status:** ⬜ Active  
+**Status:** ✅ Complete (archived 2026-06-16)  
 **Date:** 2026-06-16  
 **Milestone:** M5 — [docs/01-requirements.md §14](../../docs/01-requirements.md#14-milestones)
 
@@ -10,7 +10,7 @@ Expose dataset-backed MCP surface: 5 tools, 2 resources, 1 prompt — delegate t
 
 ## Prerequisites
 
-- [M-05](archive/M-05-embedding-module.md) complete — `semanticSearch`, pass-2 embeddings, SQL externalized ([DEC-010](../memory-bank/decisions.md#dec-010--external-sql-files-with-injectsql))
+- [M-05](M-05-embedding-module.md) complete — `semanticSearch`, pass-2 embeddings, SQL externalized ([DEC-010](../memory-bank/decisions.md#dec-010--external-sql-files-with-injectsql))
 
 ## Deliverables
 
@@ -26,15 +26,21 @@ Expose dataset-backed MCP surface: 5 tools, 2 resources, 1 prompt — delegate t
 
 | ID | Summary | Module | Test |
 |---|---|---|---|
-| REQ-006 | MCP search/stats tools | `mcp` → `retrieval`, `medicalcase`, `embedding` | MCP contract IT |
+| REQ-006 | MCP search/stats tools | `mcp` → `retrieval`, `medicalcase` | MCP contract IT |
 | DEC-004 | 5 tools, 0 completions | `mcp` | Contract IT |
 
 ## Acceptance criteria
 
-- [ ] All tools callable; responses match `CaseSummary` / `MedicalCase` / `SemanticMatch` shapes
-- [ ] No `@McpComplete`; no REST API in default profile
-- [ ] MCP injects `VectorSearchService`, `MedicalCaseRepository`, `EmbeddingService` — never `*.impl.*`
-- [ ] `mvn verify -Pintegration` passes (WSL)
+- [x] All tools callable; responses match `CaseSummary` / `MedicalCase` / `SemanticMatch` shapes
+- [x] No `@McpComplete`; no REST API in default profile
+- [x] MCP injects `VectorSearchService`, `MedicalCaseRepository` — never `*.impl.*`
+- [x] `mvn verify -Pintegration` passes (WSL)
+
+## Also shipped (SQL/IT alignment)
+
+- `@InjectSql` confined to `repository/impl`; IT cleanup via `@Sql` + `deleteAll.sql`
+- `SharedPostgresContainer` singleton + `@Testcontainers` on IT base
+- Behavioral `FlywaySchemaIntegrationTest` (no pg_catalog SQL)
 
 ## References
 
@@ -43,4 +49,4 @@ Expose dataset-backed MCP surface: 5 tools, 2 resources, 1 prompt — delegate t
 
 ## Next
 
-[M-07 config + security](M-07-config-security.md) (requirements M6).
+[M-07 config + security](../M-07-config-security.md) (requirements M6).

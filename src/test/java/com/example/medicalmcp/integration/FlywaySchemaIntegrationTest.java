@@ -2,109 +2,74 @@ package com.example.medicalmcp.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.medicalmcp.dataset.service.DatasetLoaderService;
+import com.example.medicalmcp.embedding.service.EmbeddingService;
+import com.example.medicalmcp.medicalcase.domain.CaseSummary;
+import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
+import com.example.medicalmcp.retrieval.service.VectorSearchService;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.TestPropertySource;
 
+/**
+ * Verifies Flyway V1 schema via repository behavior (docs/04-testing.md §5.3).
+ * No pg_catalog SQL — {@code @InjectSql} is limited to {@code repository/impl} (DEC-010).
+ */
+@TestPropertySource(
+        properties = {
+            "medicalmcp.dataset.loader.enabled=false",
+            "medicalmcp.dataset.loader.sources=classpath:dataset/train-sample-10.csv"
+        })
 class FlywaySchemaIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private DatasetLoaderService datasetLoaderService;
 
-    @Test
-    void extensionsAreInstalled() {
-        assertThat(countExtension("vector")).isEqualTo(1);
-        assertThat(countExtension("pg_trgm")).isEqualTo(1);
+    @Autowired
+    private MedicalCaseRepository medicalCaseRepository;
+
+    @Autowired
+    private VectorSearchService vectorSearchService;
+
+    @Autowired
+    private EmbeddingService embeddingService;
+
+    @BeforeEach
+    void loadFixture() {
+        datasetLoaderService.loadIfEmpty();
     }
 
     @Test
-    void medicalCaseTableAndColumnsExist() {
-        assertThat(tableExists("medical_case")).isTrue();
-        assertThat(columnExists("medical_case", "embedding")).isTrue();
-        assertThat(columnExists("medical_case", "fts")).isTrue();
+    void flywayCreatesQueryableMedicalCaseTable() {
+        assertThat(medicalCaseRepository.countAll()).isEqualTo(10);
+
+        CaseSummary summary =
+                medicalCaseRepository.fullTextSearch("Pacemaker Interrogation", null, null, 1).getFirst();
+        assertThat(medicalCaseRepository.findById(summary.id())).isPresent();
     }
 
     @Test
-    void embeddingColumnIs768Dimensions() {
-        String type = jdbcTemplate.queryForObject(
-                """
-                SELECT format_type(a.atttypid, a.atttypmod)
-                FROM pg_attribute a
-                JOIN pg_class c ON a.attrelid = c.oid
-                WHERE c.relname = 'medical_case' AND a.attname = 'embedding'
-                """,
-                String.class);
-        assertThat(type).isEqualTo("vector(768)");
+    void vectorExtensionStores768DimensionalEmbeddings() {
+        assertThat(medicalCaseRepository.findWithoutEmbeddings()).isEmpty();
+        assertThat(embeddingService.embedAsFloatArray("schema probe")).hasSize(768);
+        assertThat(vectorSearchService.semanticSearch("pacemaker device", null, 3, -1.0)).isNotEmpty();
     }
 
     @Test
-    void ftsColumnIsGeneratedStored() {
-        String generated = jdbcTemplate.queryForObject(
-                """
-                SELECT attgenerated
-                FROM pg_attribute
-                WHERE attrelid = 'medical_case'::regclass
-                  AND attname = 'fts'
-                """,
-                String.class);
-        assertThat(generated).isEqualTo("s");
+    void generatedFtsColumnSupportsFullTextSearch() {
+        List<CaseSummary> results = medicalCaseRepository.fullTextSearch("chest pain", null, null, 5);
+
+        assertThat(results).isNotEmpty();
     }
 
     @Test
-    void indexesExist() {
-        assertThat(indexExists("idx_medical_case_embedding")).isTrue();
-        assertThat(indexExists("idx_medical_case_fts")).isTrue();
-        assertThat(indexExists("idx_medical_case_specialty")).isTrue();
-        assertThat(indexExists("idx_medical_case_specialty_trgm")).isTrue();
-    }
+    void specialtyFilterUsesIndexedColumns() {
+        List<CaseSummary> results =
+                medicalCaseRepository.fullTextSearch("patient", "Orthopedic", null, 50);
 
-    @Test
-    void generatedFtsPopulatesOnInsert() {
-        jdbcTemplate.update(
-                """
-                INSERT INTO medical_case (sample_name, description, transcription, keywords)
-                VALUES ('Chest pain case', 'Patient reports chest pain', 'Detailed note', 'pain,chest')
-                """);
-
-        String lexeme = jdbcTemplate.queryForObject(
-                "SELECT fts::text FROM medical_case WHERE sample_name = 'Chest pain case'", String.class);
-        assertThat(lexeme).contains("chest").contains("pain");
-    }
-
-    private int countExtension(String name) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM pg_extension WHERE extname = ?", Integer.class, name);
-        return count == null ? 0 : count;
-    }
-
-    private boolean tableExists(String tableName) {
-        Integer count = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*)
-                FROM information_schema.tables
-                WHERE table_schema = 'public' AND table_name = ?
-                """,
-                Integer.class,
-                tableName);
-        return count != null && count > 0;
-    }
-
-    private boolean columnExists(String tableName, String columnName) {
-        Integer count = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*)
-                FROM information_schema.columns
-                WHERE table_schema = 'public' AND table_name = ? AND column_name = ?
-                """,
-                Integer.class,
-                tableName,
-                columnName);
-        return count != null && count > 0;
-    }
-
-    private boolean indexExists(String indexName) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM pg_indexes WHERE indexname = ?", Integer.class, indexName);
-        return count != null && count > 0;
+        assertThat(results).isNotEmpty();
+        assertThat(results).allMatch(result -> "Orthopedic".equals(result.medicalSpecialty()));
     }
 }

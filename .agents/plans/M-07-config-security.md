@@ -1,6 +1,6 @@
 # M-07 — Config + security (M6)
 
-**Status:** ⬜ Planned  
+**Status:** ⬜ Active  
 **Date:** 2026-06-16  
 **Milestone:** M6 — [docs/01-requirements.md §14](../../docs/01-requirements.md#14-milestones)
 
@@ -10,7 +10,7 @@ Harden configuration binding, security defaults, and refine operational properti
 
 ## Prerequisites
 
-- [M-06](M-06-mcp-module.md) complete — MCP surface wired
+- [M-06](archive/M-06-mcp-module.md) complete — MCP surface wired
 
 ## Deliverables
 

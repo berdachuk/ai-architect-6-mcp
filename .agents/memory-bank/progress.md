@@ -44,12 +44,19 @@
 - `semanticSearch` via pgvector; `SemanticRetrievalQualityIntegrationTest` subset
 - **REQ-004, REQ-006, DEC-010, DEC-011** · plan archived: `M-05-embedding-module.md`
 
+## 2026-06-16 — M5 MCP module + SQL/IT alignment
+
+- `MedicalCaseTools`, `MedicalCaseResources`, `MedicalCasePrompts`; `spring-ai-starter-mcp-server-webmvc`
+- `McpToolsContractIntegrationTest`, `McpResourcesIntegrationTest`
+- SQL/IT: `@Sql` cleanup, `SharedPostgresContainer`, behavioral Flyway IT
+- **REQ-006, DEC-004** · plan archived: `M-06-mcp-module.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M4 | ✅ Complete |
-| M5–M8 | ⬜ Not started |
+| M1–M5 | ✅ Complete |
+| M6–M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

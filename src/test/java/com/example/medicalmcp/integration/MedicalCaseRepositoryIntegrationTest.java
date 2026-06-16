@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
@@ -27,12 +26,8 @@ class MedicalCaseRepositoryIntegrationTest extends AbstractPostgresIntegrationTe
     @Autowired
     private MedicalCaseRepository medicalCaseRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @BeforeEach
     void loadFixture() {
-        jdbcTemplate.update("DELETE FROM medical_case");
         datasetLoaderService.loadIfEmpty();
     }
 

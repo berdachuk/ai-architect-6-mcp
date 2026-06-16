@@ -9,11 +9,9 @@ import com.example.medicalmcp.medicalcase.domain.SemanticMatch;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 @TestPropertySource(
@@ -36,19 +34,19 @@ class SemanticRetrievalQualityIntegrationTest extends AbstractPostgresIntegratio
     @Autowired
     private EmbeddingService embeddingService;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @BeforeEach
     void loadFixture() {
-        jdbcTemplate.update("DELETE FROM medical_case");
         datasetLoaderService.loadIfEmpty();
     }
 
     @Test
     void storedEmbeddingInputRanksSourceRowFirst() {
-        UUID id = jdbcTemplate.queryForObject("SELECT id FROM medical_case LIMIT 1", UUID.class);
-        MedicalCase sample = medicalCaseRepository.findById(id).orElseThrow();
+        MedicalCase sample = medicalCaseRepository
+                .findById(medicalCaseRepository
+                        .fullTextSearch("Pacemaker Interrogation", null, null, 1)
+                        .getFirst()
+                        .id())
+                .orElseThrow();
         String query = embeddingService.buildEmbeddingInput(
                 sample.sampleName(), sample.description(), sample.keywords());
 

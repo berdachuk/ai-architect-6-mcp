@@ -4,14 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
-import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
 /**
@@ -31,27 +30,16 @@ class FtsRetrievalQualityIntegrationTest extends AbstractPostgresIntegrationTest
     private VectorSearchService vectorSearchService;
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private MedicalCaseRepository medicalCaseRepository;
 
     @BeforeEach
     void loadFixture() {
-        jdbcTemplate.update("DELETE FROM medical_case");
         datasetLoaderService.loadIfEmpty();
     }
 
     @Test
     void sampleNameQueriesHitSourceRow() {
-        List<MedicalCase> rows = jdbcTemplate.query(
-                "SELECT id, sample_name, description, transcription, medical_specialty, keywords, split, created_at FROM medical_case",
-                (rs, rowNum) -> new MedicalCase(
-                        rs.getObject("id", UUID.class),
-                        rs.getString("sample_name"),
-                        rs.getString("description"),
-                        rs.getString("transcription"),
-                        rs.getString("medical_specialty"),
-                        rs.getString("keywords"),
-                        rs.getString("split"),
-                        rs.getTimestamp("created_at").toInstant()));
+        List<CaseSummary> rows = medicalCaseRepository.fullTextSearch("patient", null, "train", 50);
 
         long hits = rows.stream()
                 .filter(row -> containsSourceRow(
