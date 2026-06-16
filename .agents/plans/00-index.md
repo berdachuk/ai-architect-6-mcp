@@ -12,9 +12,11 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-06-mcp-module.md](archive/M-06-mcp-module.md) | M5 | ✅ Archived |
 | [archive/M-07-config-security.md](archive/M-07-config-security.md) | M6 | ✅ Archived |
 | [archive/M-08-e2e-smoke.md](archive/M-08-e2e-smoke.md) | M7 | ✅ Archived |
-| [M-09-docker-quality-gate.md](M-09-docker-quality-gate.md) | M8 | ⬜ **Active** |
+| [archive/M-09-docker-quality-gate.md](archive/M-09-docker-quality-gate.md) | M8 | ✅ Archived |
+| [M-10-prompt-lab.md](M-10-prompt-lab.md) | M9 | ⬜ **Active** |
+| [M-11-prompt-integration.md](M-11-prompt-integration.md) | M10 | ⬜ Planned |
 
-**Chain:** M-09
+**Chain:** M-10 → M-11 (optional future scope)
 
 Completed plans are moved to `archive/` when no longer active.
 
@@ -42,5 +44,5 @@ Completed plans are moved to `archive/` when no longer active.
 
 | Plan | Milestone | Reference |
 |---|---|---|
-| M-10 prompt-lab | M9 | [docs/future/prompt-lab.md](../../docs/future/prompt-lab.md) |
-| M-11 prompt integration | M10 | [docs/01-requirements.md §18](../../docs/01-requirements.md#18-future-scope-optional) |
+| M-10 prompt-lab | M9 | [M-10-prompt-lab.md](M-10-prompt-lab.md) |
+| M-11 prompt integration | M10 | [M-11-prompt-integration.md](M-11-prompt-integration.md) |

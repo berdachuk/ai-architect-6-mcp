@@ -64,12 +64,18 @@
 - `McpSseTestClientFactory`, `McpSmokeTestSupport`; Maven `e2e` profile + `application-e2e.yml`
 - **REQ-006, NFR-001** · plan archived: `M-08-e2e-smoke.md`
 
+## 2026-06-16 — M8 Docker + quality gate
+
+- `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `quality.yml`
+- `quality` Maven profile; `RetrievalQualityGateIntegrationTest`, `quality-report.json`
+- README Docker Compose quick start
+- **NFR-001, REQ-006** · plan archived: `M-09-docker-quality-gate.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M7 | ✅ Complete |
-| M8 | ⬜ Not started |
-| M9–M10 | ⬜ Future scope |
+| M1–M8 | ✅ Complete |
+| M9–M10 | ⬜ Optional (future) |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

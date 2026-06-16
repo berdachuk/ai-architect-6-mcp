@@ -394,32 +394,8 @@ class SemanticRetrievalQualityTest extends AbstractQualityBenchmarkTest {
 ## 9. CI pipeline (proposed)
 
 ```yaml
-# .github/workflows/test.yml (conceptual)
-jobs:
-  unit:
-    runs-on: ubuntu-latest
-    steps:
-      - run: mvn -B test
-
-  integration:
-    runs-on: ubuntu-latest
-    steps:
-      - run: mvn -B verify -Pintegration
-
-  quality:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || contains(github.ref, 'release')
-    services:
-      ollama: ...   # or use precomputed embeddings
-    steps:
-      - run: curl -L -o src/test/resources/dataset/test-full.csv \
-          https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_test.csv
-      - run: ollama pull nomic-embed-text:v1.5
-      - run: mvn -B verify -Pquality
-      - uses: actions/upload-artifact@v4
-        with:
-          name: quality-report
-          path: target/quality-report.json
+# .github/workflows/ci.yml — PR/push to develop/main
+# .github/workflows/quality.yml — nightly mvn verify -Pquality
 ```
 
 ---

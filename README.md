@@ -73,7 +73,22 @@ Modulith verification: `mvn clean verify`
 - PostgreSQL 17 with pgvector (or Docker via **WSL** on Windows)
 - Ollama with `nomic-embed-text:v1.5` pulled
 
-## Quick start (planned)
+## Quick start
+
+### Docker Compose (recommended)
+
+Requires Ollama on the host with `nomic-embed-text:v1.5` (`ollama pull nomic-embed-text:v1.5`).
+
+```bash
+docker compose up --build
+```
+
+MCP endpoint: `http://localhost:8092/sse`  
+Health: `http://localhost:8092/actuator/health`
+
+First startup downloads the HuggingFace CSVs and embeds all rows (several minutes).
+
+### Local development
 
 ```bash
 docker run -d --name medical-mcp-pg \
@@ -84,11 +99,18 @@ docker run -d --name medical-mcp-pg \
 
 ollama pull nomic-embed-text:v1.5
 
-mvn clean verify
+mvn clean verify -Pintegration   # WSL on Windows (Testcontainers)
 mvn spring-boot:run
 ```
 
-MCP endpoint: `http://localhost:8092/sse`
+### Maven profiles
+
+| Profile | Command |
+|---|---|
+| Unit + Modulith | `mvn test` |
+| Integration (Testcontainers) | `mvn verify -Pintegration` |
+| E2E smoke (SSE client) | `mvn verify -Pe2e` |
+| Quality gate (test split) | `mvn verify -Pquality` |
 
 Full deployment guide: [docs/05-deployment.md](docs/05-deployment.md)
 

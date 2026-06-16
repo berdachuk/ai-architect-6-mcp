@@ -4,17 +4,19 @@
 
 ## Current focus
 
-**M7 complete.** Next: **M8** — Docker Compose, CI, quality gate on test split. Plan: [.agents/plans/M-09-docker-quality-gate.md](../plans/M-09-docker-quality-gate.md).
+**M8 complete.** Next optional: **M9** prompt lab. Plan: [.agents/plans/M-10-prompt-lab.md](../plans/M-10-prompt-lab.md).
 
-## Next steps
+Core milestone track (M1–M8) is complete. M9/M10 are optional per [docs/01-requirements.md §18](../../docs/01-requirements.md#18-future-scope-optional).
 
-1. `Dockerfile` + `docker-compose.yml` (PG + server; Ollama on host)
-2. GitHub Actions: `mvn test`, `mvn verify -Pintegration`
-3. `quality` Maven profile — full test-split retrieval benchmarks
+## Next steps (optional M9)
+
+1. `prompt-lab` Maven profile scaffold
+2. Offline eval harness for `case-analysis` template variants
+3. Metrics alongside `quality-report.json`
 
 ## Verified
 
-- `McpSseSmokeIntegrationTest` — all 5 tools, 2 resources, `case-analysis` prompt over SSE (M7)
-- `RetrievalProperties`, `SecurityConfig`, actuator, cache TTL (M6)
-- MCP contract ITs (M5); `@InjectSql` / Testcontainers patterns (DEC-009–011)
-- `mvn verify -Pintegration` via WSL
+- Docker Compose + `Dockerfile`; GitHub Actions CI + nightly quality workflow (M8)
+- `RetrievalQualityGateIntegrationTest` + `target/test-output/quality-report.json`
+- `McpSseSmokeIntegrationTest` (M7); config/security (M6); MCP surface (M5)
+- `mvn verify -Pintegration` / `-Pquality` via WSL

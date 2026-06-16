@@ -571,7 +571,7 @@ Implementation milestones with aligned test deliverables ([04-testing.md §10](0
 | M5 | MCP module | `MedicalCaseTools` ×5, resources, `case-analysis` prompt | `McpToolsContractIntegrationTest`, `McpResourcesIntegrationTest` | ✅ |
 | M6 | Config + security | `application.yml`, `SecurityConfig`, Caffeine cache, `medicalmcp.*` properties | Config binding tests, cache TTL test | ✅ |
 | M7 | End-to-end | Claude Desktop smoke, `McpSyncClient` from med-expert-match-ce | E2E smoke checklist ([04-testing.md §11](04-testing.md#11-manual-smoke-checklist-m7)) | ✅ |
-| M8 | Docker + docs | `docker-compose.yml`, full doc set | Docker health + nightly **test** split quality gate | ⬜ |
+| M8 | Docker + docs | `docker-compose.yml`, full doc set | Docker health + nightly **test** split quality gate | ✅ |
 
 ### Optional (future)
 
