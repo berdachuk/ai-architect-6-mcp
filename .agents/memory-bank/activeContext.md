@@ -4,16 +4,16 @@
 
 ## Current focus
 
-**M3 complete.** Next: **M4** — `EmbeddingEndpointPool`, pass-2 loader, semantic search. Plan: [.agents/plans/M-05-embedding-module.md](../plans/M-05-embedding-module.md).
+**M4 complete.** Next: **M5** — MCP tools, resources, `case-analysis` prompt. Plan: [.agents/plans/M-06-mcp-module.md](../plans/M-06-mcp-module.md).
 
 ## Next steps
 
-1. Implement `MultiEndpointEmbeddingProperties` + `EmbeddingEndpointPool`
-2. `EmbeddingService` + manual `OpenAiEmbeddingModel` wiring
-3. Dataset pass-2 + `updateEmbeddingsBatch` + `semanticSearch`
+1. Implement `MedicalCaseTools` (5 tools)
+2. Implement `MedicalCaseResources` + `MedicalCasePrompts`
+3. MCP contract integration tests
 
 ## Verified
 
-- FTS search with specialty/split filters and limit clamp (M3)
-- `VectorSearchService.getDatasetStats` with Caffeine 60s cache
-- Integration tests via WSL + Docker (singleton Testcontainers)
+- `@InjectSql` external SQL + named binds (DEC-010/011)
+- `EmbeddingEndpointPool` + loader pass 2 + semantic search (M4)
+- Integration tests via WSL + Docker

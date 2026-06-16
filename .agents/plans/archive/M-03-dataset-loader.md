@@ -14,6 +14,7 @@
 | `train-sample-10.csv` fixture | ✅ |
 | `DatasetLoaderIntegrationTest` | ✅ |
 | Modulith `@NamedInterface` for `domain` / `repository` | ✅ |
+| Inline SQL in repository impl | ✅ (predates DEC-010/011; migrated in M-05) |
 
 ## Verification
 
@@ -22,4 +23,4 @@
 
 ## Next
 
-[M-04 retrieval module](M-04-retrieval-module.md) (requirements M3).
+[M-04 retrieval module](../archive/M-04-retrieval-module.md) (requirements M3) — completed; see [M-05](../M-05-embedding-module.md).

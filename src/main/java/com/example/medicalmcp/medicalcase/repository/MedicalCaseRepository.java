@@ -2,6 +2,7 @@ package com.example.medicalmcp.medicalcase.repository;
 
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.example.medicalmcp.medicalcase.domain.SemanticMatch;
 import com.example.medicalmcp.medicalcase.domain.SpecialtyCount;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,10 @@ public interface MedicalCaseRepository {
     long countAll();
 
     void insertBatch(List<MedicalCase> cases);
+
+    List<MedicalCase> findWithoutEmbeddings();
+
+    List<SemanticMatch> semanticSearch(float[] queryEmbedding, String specialty, int topK, double minSimilarity);
 
     void updateEmbeddingsBatch(Map<UUID, float[]> embeddings);
 }

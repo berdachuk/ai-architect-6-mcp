@@ -3,6 +3,13 @@ spring:
     enabled: true
 
 medicalmcp:
+  embedding:
+    multi-endpoint:
+      api-batch-size: 10
+      endpoints:
+        - url: http://localhost:11434
+          model: nomic-embed-text:v1.5
+          priority: 0
   dataset:
     loader:
       enabled: false

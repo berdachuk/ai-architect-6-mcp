@@ -2,6 +2,6 @@
     "core :: *",
     "medicalcase :: domain",
     "medicalcase :: repository",
-    "embedding :: *"
+    "embedding :: service"
 })
 package com.example.medicalmcp.retrieval;

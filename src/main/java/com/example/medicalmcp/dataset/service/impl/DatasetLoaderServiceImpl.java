@@ -2,6 +2,7 @@ package com.example.medicalmcp.dataset.service.impl;
 
 import com.example.medicalmcp.dataset.config.DatasetLoaderProperties;
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
+import com.example.medicalmcp.embedding.service.EmbeddingService;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import java.io.IOException;
@@ -10,7 +11,9 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -28,32 +31,35 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
     private static final Logger log = LoggerFactory.getLogger(DatasetLoaderServiceImpl.class);
 
     private final MedicalCaseRepository repository;
+    private final EmbeddingService embeddingService;
     private final DatasetLoaderProperties properties;
     private final ResourceLoader resourceLoader;
 
     public DatasetLoaderServiceImpl(
             MedicalCaseRepository repository,
+            EmbeddingService embeddingService,
             DatasetLoaderProperties properties,
             ResourceLoader resourceLoader) {
         this.repository = repository;
+        this.embeddingService = embeddingService;
         this.properties = properties;
         this.resourceLoader = resourceLoader;
     }
 
     @Override
     public void loadIfEmpty() {
-        if (repository.countAll() > 0) {
+        if (repository.countAll() == 0) {
+            if (properties.getSources().isEmpty()) {
+                log.warn("No dataset loader sources configured — skipping CSV ingest");
+                return;
+            }
+            for (String source : properties.getSources()) {
+                loadSource(source);
+            }
+        } else {
             log.info("Dataset already loaded ({} rows) — skipping CSV ingest", repository.countAll());
-            return;
         }
-        if (properties.getSources().isEmpty()) {
-            log.warn("No dataset loader sources configured — skipping CSV ingest");
-            return;
-        }
-
-        for (String source : properties.getSources()) {
-            loadSource(source);
-        }
+        embedMissingCases();
     }
 
     private void loadSource(String location) {
@@ -81,6 +87,34 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
             repository.insertBatch(batch);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to load dataset from " + location, ex);
+        }
+    }
+
+    private void embedMissingCases() {
+        List<MedicalCase> missing = repository.findWithoutEmbeddings();
+        if (missing.isEmpty()) {
+            return;
+        }
+        log.info("Embedding pass: {} rows without vectors", missing.size());
+
+        int processed = 0;
+        for (int i = 0; i < missing.size(); i += properties.getBatchSize()) {
+            int end = Math.min(i + properties.getBatchSize(), missing.size());
+            List<MedicalCase> batch = missing.subList(i, end);
+            List<String> texts = batch.stream()
+                    .map(medicalCase -> embeddingService.buildEmbeddingInput(
+                            medicalCase.sampleName(), medicalCase.description(), medicalCase.keywords()))
+                    .toList();
+            List<float[]> embeddings = embeddingService.embedBatch(texts);
+            Map<UUID, float[]> updates = new HashMap<>();
+            for (int j = 0; j < batch.size(); j++) {
+                updates.put(batch.get(j).id(), embeddings.get(j));
+            }
+            repository.updateEmbeddingsBatch(updates);
+            processed += batch.size();
+            if (processed % 100 == 0 || processed == missing.size()) {
+                log.info("Embedding pass progress: {}/{}", processed, missing.size());
+            }
         }
     }
 
