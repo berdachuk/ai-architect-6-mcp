@@ -1,0 +1,6 @@
+medicalmcp:
+  dataset:
+    loader:
+      enabled: false
+      sources:
+        - classpath:dataset/test-sample-10.csv

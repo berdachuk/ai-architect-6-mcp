@@ -1,0 +1,42 @@
+services:
+  medical-mcp-server:
+    build: .
+    ports:
+      - "8092:8092"
+    environment:
+      MEDICALMCP_DB_HOST: postgres
+      MEDICALMCP_DB_USERNAME: medical_mcp
+      MEDICALMCP_DB_PASSWORD: medical_mcp
+      MEDICALMCP_DATASET_LOADER_ENABLED: "true"
+      EMBEDDING_BASE_URL: http://host.docker.internal:11434
+      EMBEDDING_API_KEY: none
+      EMBEDDING_MODEL: nomic-embed-text:v1.5
+      EMBEDDING_DIMENSIONS: "768"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8092/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 300s
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: medical_mcp
+      POSTGRES_USER: medical_mcp
+      POSTGRES_PASSWORD: medical_mcp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medical_mcp -d medical_mcp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

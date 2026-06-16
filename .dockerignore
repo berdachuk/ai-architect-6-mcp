@@ -1,0 +1,11 @@
+target/
+.git/
+.idea/
+.vscode/
+.agents/
+docs/
+*.md
+!README.md
+docker-compose.override.yml
+.env
+.env.*

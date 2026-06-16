@@ -1,0 +1,88 @@
+spring:
+  application:
+    name: medical-mcp-server
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+  ai:
+    openai:
+      enabled: false
+    custom:
+      embedding:
+        api-key: ${EMBEDDING_API_KEY:none}
+        dimensions: ${EMBEDDING_DIMENSIONS:768}
+    mcp:
+      server:
+        name: medical-mcp-server
+        version: 1.6.0
+        type: SYNC
+        protocol: SSE
+        instructions: >
+          Wraps hpe-ai/medical-cases-classification-tutorial (2,464 rows, 13 specialties).
+          Use search_cases for keyword/FTS queries; semantic_search for similarity;
+          get_case to retrieve a full transcription by UUID; list_specialties to explore labels.
+          Embeddings: nomic-embed-text:v1.5 @ 768 dims.
+        sse-endpoint: /sse
+        sse-message-endpoint: /mcp/message
+        keep-alive-interval: 30s
+        capabilities:
+          tool: true
+          resource: true
+          prompt: true
+          completion: false
+        annotation-scanner:
+          enabled: true
+  datasource:
+    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5432/${MEDICALMCP_DB_NAME:medical_mcp}
+    username: ${MEDICALMCP_DB_USERNAME:medical_mcp}
+    password: ${MEDICALMCP_DB_PASSWORD:medical_mcp}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-init-sql: SET hnsw.ef_search = 40
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: ${SERVER_PORT:8092}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+medicalmcp:
+  retrieval:
+    max-limit: ${MEDICALMCP_RETRIEVAL_MAX_LIMIT:50}
+    default-top-k: ${MEDICALMCP_RETRIEVAL_DEFAULT_TOP_K:5}
+    similarity-threshold: ${MEDICALMCP_RETRIEVAL_SIMILARITY_THRESHOLD:0.70}
+    stats-cache-ttl-seconds: ${MEDICALMCP_CACHE_STATS_TTL:60}
+  embedding:
+    multi-endpoint:
+      skip-duration-min: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_SKIP_MIN:10}
+      worker-per-endpoint: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_WORKERS:1}
+      api-batch-size: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_API_BATCH_SIZE:50}
+      endpoints:
+        - url: ${EMBEDDING_BASE_URL:http://localhost:11434}
+          model: ${EMBEDDING_MODEL:nomic-embed-text:v1.5}
+          priority: 0
+  dataset:
+    loader:
+      enabled: ${MEDICALMCP_DATASET_LOADER_ENABLED:false}
+      batch-size: ${MEDICALMCP_DATASET_LOADER_BATCH_SIZE:50}
+      sources:
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_train.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_validation.csv
+        - https://huggingface.co/datasets/hpe-ai/medical-cases-classification-tutorial/resolve/main/medical_cases_test.csv

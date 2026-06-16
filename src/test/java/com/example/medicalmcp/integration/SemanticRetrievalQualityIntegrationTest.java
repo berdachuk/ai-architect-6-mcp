@@ -1,0 +1,68 @@
+package com.example.medicalmcp.integration;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.example.medicalmcp.dataset.service.DatasetLoaderService;
+import com.example.medicalmcp.embedding.service.EmbeddingService;
+import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.example.medicalmcp.medicalcase.domain.SemanticMatch;
+import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
+import com.example.medicalmcp.retrieval.service.VectorSearchService;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestPropertySource;
+
+@TestPropertySource(
+        properties = {
+            "medicalmcp.dataset.loader.enabled=false",
+            "medicalmcp.dataset.loader.sources=classpath:dataset/train-sample-10.csv",
+            "medicalmcp.retrieval.max-limit=50"
+        })
+class SemanticRetrievalQualityIntegrationTest extends AbstractPostgresIntegrationTest {
+
+    @Autowired
+    private DatasetLoaderService datasetLoaderService;
+
+    @Autowired
+    private MedicalCaseRepository medicalCaseRepository;
+
+    @Autowired
+    private VectorSearchService vectorSearchService;
+
+    @Autowired
+    private EmbeddingService embeddingService;
+
+    @BeforeEach
+    void loadFixture() {
+        datasetLoaderService.loadIfEmpty();
+    }
+
+    @Test
+    void storedEmbeddingInputRanksSourceRowFirst() {
+        MedicalCase sample = medicalCaseRepository
+                .findById(medicalCaseRepository
+                        .fullTextSearch("Pacemaker Interrogation", null, null, 1)
+                        .getFirst()
+                        .id())
+                .orElseThrow();
+        String query = embeddingService.buildEmbeddingInput(
+                sample.sampleName(), sample.description(), sample.keywords());
+
+        List<SemanticMatch> results = vectorSearchService.semanticSearch(query, null, 5, 0.0);
+
+        assertThat(results).isNotEmpty();
+        assertThat(results.getFirst().caseSummary().id()).isEqualTo(sample.id());
+        assertThat(results.getFirst().similarity()).isGreaterThan(0.99);
+    }
+
+    @Test
+    void specialtyFilterReturnsOnlyMatchingLabel() {
+        List<SemanticMatch> results =
+                vectorSearchService.semanticSearch("orthopedic knee joint", "Orthopedic", 10, -1.0);
+
+        assertThat(results).isNotEmpty();
+        assertThat(results).allMatch(match -> "Orthopedic".equals(match.caseSummary().medicalSpecialty()));
+    }
+}
