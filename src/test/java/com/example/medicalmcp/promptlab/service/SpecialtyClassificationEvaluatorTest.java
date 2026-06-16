@@ -23,13 +23,13 @@ class SpecialtyClassificationEvaluatorTest {
                 Instant.now());
 
         SpecialtyClassificationEvaluator evaluator = new SpecialtyClassificationEvaluator();
-        var summary = evaluator.evaluate(
+        var outcome = evaluator.evaluate(
                 "react",
                 "validation",
                 List.of(orthopedic),
                 OfflineClassificationSimulator::accurateOutput);
 
-        assertThat(summary.accuracy()).isEqualTo(1.0);
-        assertThat(summary.correct()).isEqualTo(1);
+        assertThat(outcome.summary().accuracy()).isEqualTo(1.0);
+        assertThat(outcome.summary().correct()).isEqualTo(1);
     }
 }

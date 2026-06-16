@@ -3,6 +3,10 @@ medicalmcp:
     enabled: true
     eval-split: validation
     min-accuracy: 0.55
+    default-limit: 10
+    max-failure-examples: 5
+    chat:
+      enabled: false
   dataset:
     loader:
       enabled: false

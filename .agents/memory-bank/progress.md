@@ -95,6 +95,11 @@
 - `docs/guides/claude-desktop-mcp.md` — config, smoke checklist, Windows MSIX notes
 - Plan archived: `M-14-claude-desktop-mcp.md`
 
+## 2026-06-16 — M12 Meta-prompting lab (M9 ext)
+
+- `PromptLabTools` MCP (5 lab tools), `MetaPromptImprovementService`, offline stub classifier
+- CI `prompt-lab` job; plan archived: `M-12-meta-prompting-lab.md`
+
 ## Milestone status
 
 | Milestone | Status |

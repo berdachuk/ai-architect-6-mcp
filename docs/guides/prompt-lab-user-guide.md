@@ -17,7 +17,7 @@ The `promptlab` module evaluates **prompt templates** for predicting `medical_sp
 - **Not** a patient-facing classification API
 - **Not** adding tools to the default MCP server (5 tools, 2 resources, 1 prompt)
 
-Live LLM evaluation and MCP lab tools (`evaluate_specialty_prompt`, etc.) are planned under [M-12](../../.agents/plans/M-12-meta-prompting-lab.md). Today the lab runs **offline** via Maven integration tests.
+Live LLM evaluation and MCP lab tools are available under the `prompt-lab` profile. Offline Maven tests run without a chat model by default.
 
 ---
 
@@ -63,6 +63,26 @@ Templates live in `PromptTemplateLibrary`. The production copy of the winner is 
 
 ---
 
+## MCP lab tools (`prompt-lab` profile only)
+
+When the server runs with `spring.profiles.active=prompt-lab`, five additional MCP tools are registered:
+
+| Tool | Purpose |
+|---|---|
+| `evaluate_specialty_prompt` | Run a template on N cases; optional saved eval run id |
+| `compare_specialty_prompts` | Rank multiple templates by accuracy |
+| `improve_specialty_prompt` | Meta-improve using failure examples from prior eval |
+| `gate_specialty_prompt` | Gate template on test (or chosen) split |
+| `list_prompt_templates` | Built-in + meta-improved templates |
+
+Default profile (**no** `prompt-lab`) keeps the production surface: 5 tools, 2 resources, 1 prompt.
+
+### Classification client
+
+CI and default `prompt-lab` runs use an **offline stub classifier** (`OfflinePromptLabClassificationClient`). Live Ollama/OpenAI chat wiring is optional future work — enable `medicalmcp.prompt-lab.chat.enabled` when implemented.
+
+---
+
 ## Run offline evaluation
 
 From the project root (use **WSL** on Windows for Docker/Testcontainers):
@@ -73,7 +93,7 @@ mvn verify -Pprompt-lab
 
 ### What runs
 
-`PromptLabOfflineEvalIntegrationTest` (tag `prompt-lab`):
+`PromptLabOfflineEvalIntegrationTest` and `PromptLabToolsIntegrationTest` (tag `prompt-lab`):
 
 1. Loads `validation-sample-10.csv` fixture into Postgres
 2. Evaluates `react_self_reflection` with an accurate offline simulator → **expects gate pass**
@@ -153,18 +173,6 @@ Eval compares model output to dataset `medical_specialty` using:
 Example canonical labels in snake_case: `cardiovascular_pulmonary`, `obstetrics_gynecology`, `ent_otolaryngology`.
 
 Unit tests: `SpecialtyLabelNormalizerTest`, `PredictedLabelExtractorTest`.
-
----
-
-## Coming in M-12
-
-When [M-12 meta-prompting lab](../../.agents/plans/M-12-meta-prompting-lab.md) ships:
-
-- Live chat-client evaluation (Ollama or OpenAI-compatible)
-- MCP tools under `prompt-lab` only: `evaluate_specialty_prompt`, `improve_specialty_prompt`, `compare_specialty_prompts`, `gate_specialty_prompt`
-- Meta-prompt improvement with failure-context examples
-
-This guide will be extended when those features land.
 
 ---
 

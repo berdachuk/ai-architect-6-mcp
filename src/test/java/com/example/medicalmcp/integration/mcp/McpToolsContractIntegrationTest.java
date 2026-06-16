@@ -136,7 +136,7 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
                 .getFirst()
                 .id();
 
-        for (String focus : List.of("description", "transcription", "keywords", "specialty", "all", null)) {
+        for (String focus : new String[] {"description", "transcription", "keywords", "specialty", "all", null}) {
             GetPromptResult prompt = medicalCasePrompts.analyzeCase(id.toString(), focus);
             assertThat(prompt.messages()).hasSize(1);
             String text = ((TextContent) prompt.messages().getFirst().content()).text();
