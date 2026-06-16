@@ -104,4 +104,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M2 complete — M3 retrieval next ([M-04 plan](.agents/plans/M-04-retrieval-module.md)).
+**Current status:** M3 complete — M4 embedding next ([M-05 plan](.agents/plans/M-05-embedding-module.md)).

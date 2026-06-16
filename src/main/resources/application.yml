@@ -17,6 +17,8 @@ server:
   port: ${SERVER_PORT:8092}
 
 medicalmcp:
+  retrieval:
+    max-limit: ${MEDICALMCP_RETRIEVAL_MAX_LIMIT:50}
   dataset:
     loader:
       enabled: ${MEDICALMCP_DATASET_LOADER_ENABLED:false}
