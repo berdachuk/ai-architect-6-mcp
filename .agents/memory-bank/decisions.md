@@ -68,3 +68,13 @@ ADR-style log. Full rationale in linked docs where applicable.
 | Date | 2026-06-16 |
 | Rationale | `ModulithArchitectureTest` uses `ApplicationModules.verify()` without DB — fast `mvn test` |
 | Source | M1 implementation |
+
+## DEC-008 — Modulith named interfaces for medicalcase
+
+| Field | Value |
+|---|---|
+| Status | Accepted |
+| Date | 2026-06-16 |
+| Modules | `medicalcase`, `dataset`, `retrieval` |
+| Rationale | `medicalcase :: *` caused Modulith violations; expose `domain` and `repository` via `@NamedInterface` |
+| Source | M2 implementation |

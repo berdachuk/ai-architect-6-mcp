@@ -49,5 +49,14 @@ Executable BDD: **not yet introduced** — use [bdd-traceability skill](../skill
 
 ## Known gaps
 
-- Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M2+.
-- Repository and services not yet implemented (M2+).
+- Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M3+.
+- Retrieval and embedding services not yet implemented (M3+).
+
+## Modulith named interfaces
+
+Cross-module `allowedDependencies` must reference explicit named interfaces, not `medicalcase :: *`:
+
+- `medicalcase :: domain` — `@NamedInterface` on `medicalcase/domain`
+- `medicalcase :: repository` — `@NamedInterface` on `medicalcase/repository`
+
+Consumers: `dataset`, `retrieval` (and later `mcp`).

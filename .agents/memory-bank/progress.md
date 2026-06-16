@@ -23,12 +23,19 @@
 - Tests: `ModulithArchitectureTest`, `FlywaySchemaIntegrationTest` — all pass
 - **REQ-005, REQ-009** · modules: all · plan archived: `M-02-modulith-foundation.md`
 
+## 2026-06-16 — M2 Dataset loader
+
+- `MedicalCaseRepository` (insert, findById, countAll), `DatasetLoaderService` pass 1
+- `train-sample-10.csv` fixture, `DatasetLoaderIntegrationTest`
+- Modulith `@NamedInterface` on medicalcase domain/repository packages
+- **REQ-005, REQ-007** · plan archived: `M-03-dataset-loader.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1 | ✅ Complete |
-| M2–M8 | ⬜ Not started |
+| M1–M2 | ✅ Complete |
+| M3–M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

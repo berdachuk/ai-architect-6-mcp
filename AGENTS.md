@@ -102,4 +102,4 @@ Layer model and maintenance rules: [docs/ai-context-strategy.md](docs/ai-context
 
 Canonical table: [docs/01-requirements.md §14](docs/01-requirements.md#14-milestones). Plans: [.agents/plans/00-index.md](.agents/plans/00-index.md).
 
-**Current status:** M1 complete — M2 dataset loader next ([M-03 plan](.agents/plans/M-03-dataset-loader.md)).
+**Current status:** M2 complete — M3 retrieval next ([M-04 plan](.agents/plans/M-04-retrieval-module.md)).
