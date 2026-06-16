@@ -22,6 +22,8 @@ Software documentation for project generation, development, and testing. Read in
 | Document | Use for |
 |---|---|
 | [use-cases.md](use-cases.md) | Actors, workflows, per-tool scenarios, out-of-scope list |
+| [ai-context-strategy.md](ai-context-strategy.md) | AI agent context layers (skills, memory bank) |
+| [../AGENTS.md](../AGENTS.md) | Root agent index (repo root) |
 | [future/prompt-lab.md](future/prompt-lab.md) | Optional M9/M10 — prompt evaluation lab (not required for M1–M8) |
 
 ## Quick reference
@@ -37,6 +39,8 @@ Software documentation for project generation, development, and testing. Read in
 | Future prompt-lab (M9/M10) | [01-requirements §18](01-requirements.md#18-future-scope-optional) |
 
 ## For AI / codegen agents
+
+Start with [AGENTS.md](../AGENTS.md) and [.agents/memory-bank/](../.agents/memory-bank/).
 
 1. Read **01-requirements** — constrain scope to dataset-backed MCP surface only.
 2. Read **02-architecture** — single Maven module, Spring Modulith package boundaries, JDBC only.

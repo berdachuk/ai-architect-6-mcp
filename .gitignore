@@ -1,0 +1,65 @@
+# Build
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+.flattened-pom.xml
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+.springBeans
+.sts4-cache
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & diagnostics
+*.log
+hs_err_pid*
+replay_pid*
+
+# Env & secrets (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+application-local.yml
+application-local.properties
+
+# Test & coverage
+.gradle/
+test-output/
+jacoco.exec
+*.hprof
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Dataset cache (if downloaded locally)
+data/
+*.csv
+!src/test/resources/**/*.csv
+
+# AI / agent local state (optional adapters)
+.cursor/mcp.json

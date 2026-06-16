@@ -16,6 +16,7 @@ Full index and reading order: **[docs/README.md](docs/README.md)**
 | 3 | [04-testing.md](docs/04-testing.md) | Test plan |
 | 4 | [05-deployment.md](docs/05-deployment.md) | Deployment & operations |
 | + | [use-cases.md](docs/use-cases.md) | Use case catalog |
+| + | [AGENTS.md](AGENTS.md) | AI agent index — skills, memory bank, module guides |
 
 ## Dataset (verified 2026-06-16)
 
