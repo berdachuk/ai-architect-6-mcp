@@ -247,5 +247,25 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>prompt-lab-quality</id>
+            <properties>
+                <spring.profiles.active>test,prompt-lab,quality</spring.profiles.active>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                                <include>**/integration/quality/*IntegrationTest.java</include>
+                                <include>**/integration/promptlab/*IntegrationTest.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

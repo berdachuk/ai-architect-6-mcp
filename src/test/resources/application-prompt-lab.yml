@@ -7,6 +7,8 @@ medicalmcp:
     max-failure-examples: 5
     chat:
       enabled: false
+      base-url: http://localhost:11434
+      model: llama3.2
   dataset:
     loader:
       enabled: false
