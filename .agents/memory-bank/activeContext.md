@@ -4,19 +4,17 @@
 
 ## Current focus
 
-**M10 complete.** Core track M1–M8 and optional M9/M10 are complete.
+**M13 user guides complete** — [docs/guides/README.md](../../docs/guides/README.md) (MCP, prompt-lab, LM Studio).
 
-Next optional extended lab: **M9 ext** — meta-prompting MCP tools. Plan: [.agents/plans/M-12-meta-prompting-lab.md](../plans/M-12-meta-prompting-lab.md).
+**Active plans:**
 
-## Next steps (optional M-12)
+- **M-14** — Claude Desktop MCP guide ([plan](../plans/M-14-claude-desktop-mcp.md))
+- **M-12** — meta-prompting lab code ([plan](../plans/M-12-meta-prompting-lab.md))
 
-1. `MetaPromptImprovementService` with failure-context meta prompt
-2. `PromptLabTools` MCP under `prompt-lab` profile
-3. Live chat-client eval path + optional CI nightly
+Core track M1–M8 and optional M9–M10 are complete.
 
 ## Verified
 
-- `focus=specialty` on `case-analysis` uses promoted `react_self_reflection` block (M10)
-- `promptlab` offline eval + `mvn verify -Pprompt-lab` (M9)
-- Docker/CI/quality gate (M8); E2E SSE smoke (M7)
-- Default MCP surface unchanged (5 tools, 2 resources, 1 prompt)
+- User guides shipped under `docs/guides/`
+- `focus=specialty` promoted prompt (M10); offline prompt-lab (M9)
+- Default MCP surface: 5 tools, 2 resources, 1 prompt

@@ -84,6 +84,12 @@
 - Tests: `MedicalCasePromptsStructureTest`, extended `McpToolsContractIntegrationTest`
 - **REQ §18** · plan archived: `M-11-prompt-integration.md`
 
+## 2026-06-16 — M13 User guides (docs)
+
+- `docs/guides/` — MCP user guide, prompt-lab guide, LM Studio manual test
+- Linked from `docs/README.md`, root `README.md`, `05-deployment.md`
+- Plan archived: `M-13-user-guides.md`
+
 ## Milestone status
 
 | Milestone | Status |
