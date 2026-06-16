@@ -8,6 +8,7 @@ import com.example.medicalmcp.mcp.MedicalCaseResources;
 import com.example.medicalmcp.mcp.MedicalCaseTools;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,28 +31,31 @@ class McpResourcesIntegrationTest extends AbstractPostgresIntegrationTest {
     @Autowired
     private MedicalCaseResources medicalCaseResources;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void loadFixture() {
         datasetLoaderService.loadIfEmpty();
     }
 
     @Test
-    void medicalCaseResourceReturnsFullRecord() {
+    void medicalCaseResourceReturnsFullRecord() throws Exception {
         UUID id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();
 
-        MedicalCase medicalCase = medicalCaseResources.getCase(id.toString());
+        String json = medicalCaseResources.getCase(id.toString());
+        MedicalCase medicalCase = objectMapper.readValue(json, MedicalCase.class);
 
-        assertThat(medicalCase).isNotNull();
         assertThat(medicalCase.id()).isEqualTo(id);
         assertThat(medicalCase.transcription()).isNotBlank();
     }
 
     @Test
-    void medicalStatsResourceMatchesToolOutput() {
-        DatasetStats fromResource = medicalCaseResources.getStats();
+    void medicalStatsResourceMatchesToolOutput() throws Exception {
+        DatasetStats fromResource = objectMapper.readValue(medicalCaseResources.getStats(), DatasetStats.class);
         DatasetStats fromTool = medicalCaseTools.getDatasetStats();
 
         assertThat(fromResource.totalCases()).isEqualTo(fromTool.totalCases());

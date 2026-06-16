@@ -1,6 +1,6 @@
 # M-08 — End-to-end smoke (M7)
 
-**Status:** ⬜ Planned  
+**Status:** ⬜ Active  
 **Date:** 2026-06-16  
 **Milestone:** M7 — [docs/01-requirements.md §14](../../docs/01-requirements.md#14-milestones)
 
@@ -10,7 +10,7 @@ Validate full MCP stack against real clients: `McpSyncClient` (med-expert-match-
 
 ## Prerequisites
 
-- [M-07](M-07-config-security.md) complete — config and security hardened
+- [M-07](archive/M-07-config-security.md) complete — config and security hardened
 - Ollama with `nomic-embed-text:v1.5` on host for semantic smoke
 
 ## Deliverables

@@ -34,7 +34,8 @@ public class MedicalCasePrompts {
                                     "Dataset field emphasis: description | transcription | keywords | specialty | all",
                             required = false)
                     String focus) {
-        MedicalCase medicalCase = caseRepository.findById(parseUuid(caseId)).orElse(null);
+        UUID uuid = parseUuid(caseId);
+        MedicalCase medicalCase = uuid == null ? null : caseRepository.findById(uuid).orElse(null);
         if (medicalCase == null) {
             return GetPromptResult.builder(List.of())
                     .description("Case not found")

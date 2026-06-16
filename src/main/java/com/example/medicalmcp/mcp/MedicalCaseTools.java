@@ -50,7 +50,11 @@ public class MedicalCaseTools {
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false),
             generateOutputSchema = true)
     public MedicalCase getCase(@McpToolParam(description = "Case UUID", required = true) String id) {
-        return caseRepository.findById(parseUuid(id)).orElse(null);
+        UUID uuid = parseUuid(id);
+        if (uuid == null) {
+            return null;
+        }
+        return caseRepository.findById(uuid).orElse(null);
     }
 
     @McpTool(

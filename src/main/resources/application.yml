@@ -46,15 +46,34 @@ spring:
 
 server:
   port: ${SERVER_PORT:8092}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 medicalmcp:
   retrieval:
     max-limit: ${MEDICALMCP_RETRIEVAL_MAX_LIMIT:50}
+    default-top-k: ${MEDICALMCP_RETRIEVAL_DEFAULT_TOP_K:5}
+    similarity-threshold: ${MEDICALMCP_RETRIEVAL_SIMILARITY_THRESHOLD:0.70}
+    stats-cache-ttl-seconds: ${MEDICALMCP_CACHE_STATS_TTL:60}
   embedding:
     multi-endpoint:
-      skip-duration-min: ${MEDICALMCP_EMBEDDING_SKIP_DURATION_MIN:10}
-      worker-per-endpoint: ${MEDICALMCP_EMBEDDING_WORKERS:1}
-      api-batch-size: ${MEDICALMCP_EMBEDDING_API_BATCH_SIZE:50}
+      skip-duration-min: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_SKIP_MIN:10}
+      worker-per-endpoint: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_WORKERS:1}
+      api-batch-size: ${MEDICALMCP_EMBEDDING_MULTI_ENDPOINT_API_BATCH_SIZE:50}
       endpoints:
         - url: ${EMBEDDING_BASE_URL:http://localhost:11434}
           model: ${EMBEDDING_MODEL:nomic-embed-text:v1.5}

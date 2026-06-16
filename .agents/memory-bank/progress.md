@@ -51,12 +51,19 @@
 - SQL/IT: `@Sql` cleanup, `SharedPostgresContainer`, behavioral Flyway IT
 - **REQ-006, DEC-004** · plan archived: `M-06-mcp-module.md`
 
+## 2026-06-16 — M6 Config + security
+
+- `RetrievalProperties`, `SecurityConfig`, `JacksonConfig`; actuator + security starters
+- Property binding/validation tests; `StatsCacheTtlIntegrationTest`
+- MCP resources return JSON strings; invalid UUID guard in tools/prompts
+- **NFR-003, NFR-004, REQ-006** · plan archived: `M-07-config-security.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
-| M1–M5 | ✅ Complete |
-| M6–M8 | ⬜ Not started |
+| M1–M6 | ✅ Complete |
+| M7–M8 | ⬜ Not started |
 | M9–M10 | ⬜ Future scope |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)
