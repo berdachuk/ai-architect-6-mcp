@@ -1,6 +1,6 @@
 # M-11 — Prompt integration (M10, optional)
 
-**Status:** ⬜ Planned  
+**Status:** ⬜ Active  
 **Date:** 2026-06-16  
 **Milestone:** M10 — [docs/01-requirements.md §18](../../docs/01-requirements.md#18-future-scope-optional)
 
@@ -10,7 +10,7 @@ Promote the winning `case-analysis` template from prompt-lab eval into `MedicalC
 
 ## Prerequisites
 
-- [M-10](M-10-prompt-lab.md) complete — eval harness and promoted template artifact
+- [M-10](archive/M-10-prompt-lab.md) complete — offline eval harness and `prompt-lab` profile
 
 ## Deliverables
 

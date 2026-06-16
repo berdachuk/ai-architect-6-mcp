@@ -659,7 +659,7 @@ Full strategy: [04-testing.md](04-testing.md). Summary:
 | Unit + Modulith | default | Every `mvn test` |
 | Integration (Testcontainers) | `integration` | Every PR — `mvn verify -Pintegration` |
 | Response quality (test split) | `quality` | Nightly / pre-release |
-| E2E MCP client | `e2e` | Manual / staging |
+| `prompt-lab` | + offline specialty prompt eval | Manual / nightly (`mvn verify -Pprompt-lab`) |
 
 ### Dataset splits in tests
 

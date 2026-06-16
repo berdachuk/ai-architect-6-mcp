@@ -71,11 +71,18 @@
 - README Docker Compose quick start
 - **NFR-001, REQ-006** · plan archived: `M-09-docker-quality-gate.md`
 
+## 2026-06-16 — M9 Prompt lab (optional)
+
+- `promptlab` module: label normalizer, evaluator, template library, offline simulator
+- `mvn verify -Pprompt-lab`; metrics merged into `quality-report.json`
+- **REQ §18** · plan archived: `M-10-prompt-lab.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
 | M1–M8 | ✅ Complete |
-| M9–M10 | ⬜ Optional (future) |
+| M9 | ✅ Complete (optional) |
+| M10 | ⬜ Optional (future) |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

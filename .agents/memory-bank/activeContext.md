@@ -4,19 +4,18 @@
 
 ## Current focus
 
-**M8 complete.** Next optional: **M9** prompt lab. Plan: [.agents/plans/M-10-prompt-lab.md](../plans/M-10-prompt-lab.md).
+**M9 complete.** Next optional: **M10** — wire promoted prompt into `MedicalCasePrompts`. Plan: [.agents/plans/M-11-prompt-integration.md](../plans/M-11-prompt-integration.md).
 
-Core milestone track (M1–M8) is complete. M9/M10 are optional per [docs/01-requirements.md §18](../../docs/01-requirements.md#18-future-scope-optional).
+Core track M1–M8 and optional M9 are complete.
 
-## Next steps (optional M9)
+## Next steps (optional M10)
 
-1. `prompt-lab` Maven profile scaffold
-2. Offline eval harness for `case-analysis` template variants
-3. Metrics alongside `quality-report.json`
+1. Select winning template from prompt-lab eval
+2. Update `MedicalCasePrompts` with promoted specialty-classification hints
+3. Regression tests for prompt structure (no LLM quality assertions)
 
 ## Verified
 
-- Docker Compose + `Dockerfile`; GitHub Actions CI + nightly quality workflow (M8)
-- `RetrievalQualityGateIntegrationTest` + `target/test-output/quality-report.json`
-- `McpSseSmokeIntegrationTest` (M7); config/security (M6); MCP surface (M5)
-- `mvn verify -Pintegration` / `-Pquality` via WSL
+- `promptlab` module + `mvn verify -Pprompt-lab` offline eval (M9)
+- Docker/CI/quality gate (M8); E2E SSE smoke (M7)
+- Default MCP surface unchanged (5 tools, 2 resources, 1 prompt)

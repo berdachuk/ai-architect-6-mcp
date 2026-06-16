@@ -13,10 +13,10 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-07-config-security.md](archive/M-07-config-security.md) | M6 | ✅ Archived |
 | [archive/M-08-e2e-smoke.md](archive/M-08-e2e-smoke.md) | M7 | ✅ Archived |
 | [archive/M-09-docker-quality-gate.md](archive/M-09-docker-quality-gate.md) | M8 | ✅ Archived |
-| [M-10-prompt-lab.md](M-10-prompt-lab.md) | M9 | ⬜ **Active** |
-| [M-11-prompt-integration.md](M-11-prompt-integration.md) | M10 | ⬜ Planned |
+| [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) | M9 | ✅ Archived |
+| [M-11-prompt-integration.md](M-11-prompt-integration.md) | M10 | ⬜ **Active** |
 
-**Chain:** M-10 → M-11 (optional future scope)
+**Chain:** M-11 (optional future scope)
 
 Completed plans are moved to `archive/` when no longer active.
 

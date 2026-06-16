@@ -111,6 +111,7 @@ mvn spring-boot:run
 | Integration (Testcontainers) | `mvn verify -Pintegration` |
 | E2E smoke (SSE client) | `mvn verify -Pe2e` |
 | Quality gate (test split) | `mvn verify -Pquality` |
+| Prompt lab (offline eval) | `mvn verify -Pprompt-lab` |
 
 Full deployment guide: [docs/05-deployment.md](docs/05-deployment.md)
 
