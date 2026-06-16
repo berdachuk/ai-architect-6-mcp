@@ -35,6 +35,8 @@ Spring AI 2.0 MCP server over the [HPE medical cases dataset](https://huggingfac
 | `mvn verify -Pquality` | + test-split retrieval benchmarks |
 | `mvn spring-boot:run` | Local server `:8092/sse` |
 
+> **Windows:** run Maven and Docker/Testcontainers from **WSL** — see [techContext.md](.agents/memory-bank/techContext.md).
+
 ## Global boundaries
 
 | | Rule |

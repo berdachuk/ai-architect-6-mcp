@@ -32,10 +32,14 @@ Profiles: [docs/04-testing.md §3](../docs/04-testing.md#3-test-pyramid)
 - Ollama on host for embeddings (not in default Docker Compose)
 - Env vars: [docs/01-requirements.md §13](../docs/01-requirements.md#13-environment-variables), [docs/05-deployment.md](../docs/05-deployment.md)
 
+### Windows + Docker
+
+On Windows dev machines, **use WSL** to access Docker (Docker Desktop WSL2 backend). Run `docker` CLI, `docker compose`, and `mvn verify -Pintegration` (Testcontainers) from a **WSL shell** — not native PowerShell/CMD. Clone or work under the WSL filesystem (`~/projects/...`) when possible for better I/O; otherwise `cd` to `/mnt/c/...` from WSL.
+
 ## Local prerequisites
 
 - JDK 21, Maven 3.9+
-- PostgreSQL 17 + pgvector OR Docker
+- PostgreSQL 17 + pgvector OR Docker (via **WSL** on Windows)
 - `ollama pull nomic-embed-text:v1.5`
 
 ## Repository state

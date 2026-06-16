@@ -78,3 +78,12 @@ ADR-style log. Full rationale in linked docs where applicable.
 | Modules | `medicalcase`, `dataset`, `retrieval` |
 | Rationale | `medicalcase :: *` caused Modulith violations; expose `domain` and `repository` via `@NamedInterface` |
 | Source | M2 implementation |
+
+## DEC-009 — WSL for Docker on Windows
+
+| Field | Value |
+|---|---|
+| Status | Accepted |
+| Date | 2026-06-16 |
+| Rationale | Docker Desktop exposes the daemon to WSL2; Testcontainers and `docker` CLI fail or misbehave from native Windows shells |
+| Source | Dev environment note |

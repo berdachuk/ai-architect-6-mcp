@@ -21,6 +21,8 @@ TDD workflow, test layout, Maven profiles, and retrieval quality gates for `medi
 5. `mvn test` / `mvn verify -Pintegration`
 6. Security post-check before commit
 
+**Windows:** Testcontainers needs Docker via **WSL** — run tests from a WSL terminal, not PowerShell.
+
 ### Layout (planned)
 
 ```text

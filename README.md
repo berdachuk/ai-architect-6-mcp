@@ -70,7 +70,7 @@ Modulith verification: `mvn clean verify`
 ## Prerequisites
 
 - JDK 21, Maven 3.9+
-- PostgreSQL 17 with pgvector
+- PostgreSQL 17 with pgvector (or Docker via **WSL** on Windows)
 - Ollama with `nomic-embed-text:v1.5` pulled
 
 ## Quick start (planned)
