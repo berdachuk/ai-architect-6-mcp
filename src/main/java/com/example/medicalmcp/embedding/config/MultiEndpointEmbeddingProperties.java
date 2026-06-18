@@ -15,8 +15,7 @@ import org.springframework.validation.annotation.Validated;
 public class MultiEndpointEmbeddingProperties {
 
     @NotEmpty
-    @Valid
-    private List<EndpointConfig> endpoints = new ArrayList<>();
+    private List<@Valid EndpointConfig> endpoints = new ArrayList<>();
 
     @Min(1)
     private int skipDurationMin = 10;

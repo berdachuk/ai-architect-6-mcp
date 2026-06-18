@@ -10,12 +10,12 @@ Step-by-step guide to connect **Claude Desktop** to **medical-mcp-server** and m
 
 ## Overview
 
-| Component | Role |
-|---|---|
-| **Claude Desktop** | MCP host — Anthropic-hosted model + tool calling |
-| **medical-mcp-server** | Remote SSE MCP server — dataset tools on port 8092 |
-| **PostgreSQL + pgvector** | Case storage and vector index |
-| **Ollama** | Embedding API for `semantic_search` only (`nomic-embed-text:v1.5`) |
+| Component                 | Role                                                               |
+|---------------------------|--------------------------------------------------------------------|
+| **Claude Desktop**        | MCP host — Anthropic-hosted model + tool calling                   |
+| **medical-mcp-server**    | Remote SSE MCP server — dataset tools on port 8092                 |
+| **PostgreSQL + pgvector** | Case storage and vector index                                      |
+| **Ollama**                | Embedding API for `semantic_search` only (`nomic-embed-text:v1.5`) |
 
 Claude Desktop does **not** run embeddings. The MCP server calls Ollama when you use `semantic_search`. See [01-requirements.md §3](../01-requirements.md#3-embedding-model).
 
@@ -76,11 +76,11 @@ Wait for first-time dataset download and embedding pass (watch server logs). `se
 
 ### Config file locations
 
-| OS | Documented path |
-|---|---|
-| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
-| Linux | `~/.config/claude/claude_desktop_config.json` |
+| OS      | Documented path                                                   |
+|---------|-------------------------------------------------------------------|
+| macOS   | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json`                     |
+| Linux   | `~/.config/claude/claude_desktop_config.json`                     |
 
 ### In-app editor (recommended)
 
@@ -147,12 +147,12 @@ See [anthropics/claude-code#26073](https://github.com/anthropics/claude-code/iss
 
 ## Claude Desktop vs LM Studio
 
-| | Claude Desktop | LM Studio |
-|---|---|---|
-| Model | Anthropic hosted | Local model on your GPU |
-| Config file | `claude_desktop_config.json` | `mcp.json` |
-| Resources | Strong MCP resource support | Varies by version |
-| Best for | Daily use, W01 workflows | Offline / local model testing |
+|             | Claude Desktop               | LM Studio                     |
+|-------------|------------------------------|-------------------------------|
+| Model       | Anthropic hosted             | Local model on your GPU       |
+| Config file | `claude_desktop_config.json` | `mcp.json`                    |
+| Resources   | Strong MCP resource support  | Varies by version             |
+| Best for    | Daily use, W01 workflows     | Offline / local model testing |
 
 LM Studio setup: [lm-studio-mcp-manual-test.md](lm-studio-mcp-manual-test.md).
 
@@ -162,15 +162,15 @@ LM Studio setup: [lm-studio-mcp-manual-test.md](lm-studio-mcp-manual-test.md).
 
 Same checklist as [04-testing.md §11](../04-testing.md#11-manual-smoke-checklist-m7) and the LM Studio guide.
 
-| Step | Suggested user message | Expected MCP call |
-|---:|---|---|
-| 1 | “What medical dataset stats are available?” | `get_dataset_stats` |
-| 2 | “List all medical specialties and their case counts.” | `list_specialties` |
-| 3 | “Search for cases about pacemaker interrogation.” | `search_cases` |
-| 4 | “Find cases semantically similar to: pacemaker device check.” | `semantic_search` |
-| 5 | “Get the full case details for UUID `<paste-from-step-3>`.” | `get_case` |
-| 6 | “Use the case-analysis prompt for that case with focus transcription.” | `case-analysis` prompt |
-| 7 | “Run case-analysis on the same case with focus specialty.” | `case-analysis` — includes `PREDICTED_LABEL` block |
+| Step  | Suggested user message                                                 | Expected MCP call                                  |
+|------:|------------------------------------------------------------------------|----------------------------------------------------|
+|     1 | “What medical dataset stats are available?”                            | `get_dataset_stats`                                |
+|     2 | “List all medical specialties and their case counts.”                  | `list_specialties`                                 |
+|     3 | “Search for cases about pacemaker interrogation.”                      | `search_cases`                                     |
+|     4 | “Find cases semantically similar to: pacemaker device check.”          | `semantic_search`                                  |
+|     5 | “Get the full case details for UUID `<paste-from-step-3>`.”            | `get_case`                                         |
+|     6 | “Use the case-analysis prompt for that case with focus transcription.” | `case-analysis` prompt                             |
+|     7 | “Run case-analysis on the same case with focus specialty.”             | `case-analysis` — includes `PREDICTED_LABEL` block |
 
 ### Pass criteria
 
@@ -211,20 +211,20 @@ Useful when you want case JSON attached without a separate `get_case` tool round
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---|---|
+| Symptom                             | Fix                                                             |
+|-------------------------------------|-----------------------------------------------------------------|
 | MCP server not listed after restart | Validate JSON; fully quit and relaunch; check Windows MSIX path |
-| Connection refused on `:8092` | Start medical-mcp-server; verify health endpoint |
-| Tools never invoked | Ask explicitly (“use the medical MCP tools to…”) |
-| `semantic_search` empty | Start Ollama; wait for embedding pass in server logs |
-| Wrong specialty filter | Use exact labels from `list_specialties` |
-| 404 on MCP URL | Use `http://localhost:8092/sse` exactly |
+| Connection refused on `:8092`       | Start medical-mcp-server; verify health endpoint                |
+| Tools never invoked                 | Ask explicitly (“use the medical MCP tools to…”)                |
+| `semantic_search` empty             | Start Ollama; wait for embedding pass in server logs            |
+| Wrong specialty filter              | Use exact labels from `list_specialties`                        |
+| 404 on MCP URL                      | Use `http://localhost:8092/sse` exactly                         |
 
 ### Logs
 
-| OS | MCP logs directory |
-|---|---|
-| macOS | `~/Library/Logs/Claude/` |
+| OS      | MCP logs directory                            |
+|---------|-----------------------------------------------|
+| macOS   | `~/Library/Logs/Claude/`                      |
 | Windows | `%APPDATA%\Claude\logs\` (or MSIX equivalent) |
 
 Look for `mcp-server-medical-mcp-server.log` and `mcp.log`.

@@ -74,7 +74,7 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
                 CSVParser parser = CSVFormat.DEFAULT.builder()
                         .setHeader()
                         .setSkipHeaderRecord(true)
-                        .build()
+                        .get()
                         .parse(reader)) {
             List<MedicalCase> batch = new ArrayList<>(properties.getBatchSize());
             for (CSVRecord record : parser) {
