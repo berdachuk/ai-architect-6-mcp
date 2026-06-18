@@ -109,6 +109,12 @@
 - Docs: `prompt-lab-user-guide.md`
 - **Plan archived:** `M-15-prompt-lab-live-chat.md`
 
+## 2026-06-18 — LM Studio MCP manual test (docs)
+
+- `docs/guides/lm-studio-mcp-test-report-2026-06-18.md` — google/gemma-4-26b-a4b smoke test
+- All 7 steps passed: `get_dataset_stats`, `list_specialties`, `search_cases`, `semantic_search`, `get_case`, `case-analysis` (transcription + specialty)
+- Committed and pushed to `develop`
+
 ## Milestone status
 
 | Milestone | Status |
