@@ -50,8 +50,11 @@ server:
 
 logging:
   file:
-    name: ${LOG_PATH:${LOG_TEMP:-/tmp}}/medical-mcp-server.log
-    append: true
+    name: logs/medical-mcp-server.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
   level:
     root: INFO
 
