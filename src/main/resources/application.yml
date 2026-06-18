@@ -48,6 +48,13 @@ server:
   port: ${SERVER_PORT:8092}
   shutdown: graceful
 
+logging:
+  file:
+    name: ${LOG_PATH:${LOG_TEMP:-/tmp}}/medical-mcp-server.log
+    append: true
+  level:
+    root: INFO
+
 management:
   endpoints:
     web:
