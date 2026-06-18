@@ -1,5 +1,6 @@
 package com.example.medicalmcp.mcp;
 
+import com.example.medicalmcp.core.util.UuidUtils;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
@@ -13,7 +14,6 @@ import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.ai.mcp.annotation.context.McpSyncRequestContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class MedicalCaseTools {
@@ -52,7 +52,7 @@ public class MedicalCaseTools {
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false),
             generateOutputSchema = true)
     public MedicalCase getCase(@McpToolParam(description = "Case UUID", required = true) String id) {
-        UUID uuid = parseUuid(id);
+        UUID uuid = UuidUtils.parseUuid(id);
         if (uuid == null) {
             return null;
         }
@@ -101,16 +101,5 @@ public class MedicalCaseTools {
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public DatasetStats getDatasetStats() {
         return vectorSearch.getDatasetStats();
-    }
-
-    private static UUID parseUuid(String id) {
-        if (!StringUtils.hasText(id)) {
-            return null;
-        }
-        try {
-            return UUID.fromString(id.trim());
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 }

@@ -50,7 +50,7 @@ Executable BDD: **not yet introduced** — use [bdd-traceability skill](../skill
 ## Known gaps
 
 - Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M3+.
-- Retrieval: FTS/stats + semantic search done (M3–M4); MCP adapters pending (M5).
+- M-16 CI combined quality gates pending.
 
 ## Modulith named interfaces
 

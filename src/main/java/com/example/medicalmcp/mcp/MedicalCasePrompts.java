@@ -1,5 +1,6 @@
 package com.example.medicalmcp.mcp;
 
+import com.example.medicalmcp.core.util.UuidUtils;
 import com.example.medicalmcp.core.prompt.PromotedSpecialtyClassificationInstructions;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
@@ -8,6 +9,7 @@ import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
 import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.ai.mcp.annotation.McpArg;
 import org.springframework.ai.mcp.annotation.McpPrompt;
@@ -36,7 +38,7 @@ public class MedicalCasePrompts {
                                     "Dataset field emphasis: description | transcription | keywords | specialty | all",
                             required = false)
                     String focus) {
-        UUID uuid = parseUuid(caseId);
+        UUID uuid = UuidUtils.parseUuid(caseId);
         MedicalCase medicalCase = uuid == null ? null : caseRepository.findById(uuid).orElse(null);
         if (medicalCase == null) {
             return GetPromptResult.builder(List.of())
@@ -45,7 +47,7 @@ public class MedicalCasePrompts {
         }
 
         String message = buildAnalysisMessage(medicalCase, resolveFocus(focus));
-        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(null, message, java.util.Map.of()))))
+        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(null, message, Map.of()))))
                 .description("Medical case analysis template")
                 .build();
     }
@@ -104,16 +106,5 @@ public class MedicalCasePrompts {
 
     private static void appendSpecialty(StringBuilder message, MedicalCase medicalCase) {
         message.append("Medical specialty: ").append(medicalCase.medicalSpecialty()).append('\n');
-    }
-
-    private static UUID parseUuid(String id) {
-        if (!StringUtils.hasText(id)) {
-            return null;
-        }
-        try {
-            return UUID.fromString(id.trim());
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 }

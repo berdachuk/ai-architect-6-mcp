@@ -1,6 +1,5 @@
 package com.example.medicalmcp.mcp;
 
-import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
@@ -53,9 +52,5 @@ public class MedicalCaseResources {
         } catch (IllegalArgumentException ex) {
             return null;
         }
-    }
-
-    DatasetStats readStats() {
-        return vectorSearch.getDatasetStats();
     }
 }
