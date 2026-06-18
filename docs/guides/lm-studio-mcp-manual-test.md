@@ -138,7 +138,7 @@ Mirror of [04-testing.md §11](../04-testing.md#11-manual-smoke-checklist-m7). S
 |     2 | “List all medical specialties and their case counts.”                  | `list_specialties`                                 |
 |     3 | “Search for cases about pacemaker interrogation.”                      | `search_cases`                                     |
 |     4 | “Find cases semantically similar to: pacemaker device check.”          | `semantic_search`                                  |
-|     5 | “Get the full case details for UUID `<paste-from-step-3>`.”            | `get_case`                                         |
+|     5 | “Get the full case details for ID `<paste-from-step-3>`.”              | `get_case`                                         |
 |     6 | “Use the case-analysis prompt for that case with focus transcription.” | `case-analysis` prompt                             |
 |     7 | “Run case-analysis on the same case with focus specialty.”             | `case-analysis` — includes `PREDICTED_LABEL` block |
 
