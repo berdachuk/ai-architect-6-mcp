@@ -41,12 +41,12 @@ Remove `DEFAULT gen_random_uuid()`. ID generation moves to the loader.
 ### 2. ID generation — `DatasetLoaderServiceImpl`
 
 ```java
-import org.bson.types.ObjectId;
+import com.example.medicalmcp.core.util.IdGenerator;
 
-String id = new ObjectId().toHexString();  // 24-char hex
+String id = IdGenerator.generateId();  // 24-char hex, MongoDB ObjectId algorithm
 ```
 
-Add `org.mongodb:bson` dependency (lightweight, no driver needed).
+No external dependency — `IdGenerator` is pure Java (see §5).
 
 ### 3. Domain records
 
@@ -72,17 +72,25 @@ public interface MedicalCaseRepository {
 }
 ```
 
-### 5. Core utility — `IdUtils` (rename from `UuidUtils`)
+### 5. Core utility — `IdGenerator` (replace `UuidUtils`)
+
+Port from `med-expert-match-ce` `IdGenerator` — pure Java, no dependencies. Implements MongoDB ObjectId algorithm:
+
+- 4 bytes: timestamp (seconds since Unix epoch)
+- 3 bytes: machine identifier (hash of MAC address)
+- 2 bytes: process ID
+- 3 bytes: counter (random start, increments)
 
 ```java
-public final class IdUtils {
-    private static final Pattern HEX24 = Pattern.compile("^[a-f0-9]{24}$");
+package com.example.medicalmcp.core.util;
 
-    public static boolean isValidId(String id) {
-        return id != null && HEX24.matcher(id.trim().toLowerCase()).matches();
-    }
+public final class IdGenerator {
+    public static String generateId();       // 24-char hex
+    public static boolean isValidId(String id);  // ^[0-9a-fA-F]{24}$
 }
 ```
+
+Full source: see `med-expert-match-ce` `IdGenerator.java`.
 
 ### 6. MCP tools — `MedicalCaseTools`
 
@@ -90,7 +98,7 @@ public final class IdUtils {
 @McpToolParam(description = "Case ID (24-char hex string)", required = true) String id
 
 // In getCase:
-if (!IdUtils.isValidId(id)) { return null; }
+if (!IdGenerator.isValidId(id)) { return null; }
 caseRepository.findById(id.trim().toLowerCase()).orElse(null);
 ```
 
@@ -98,6 +106,14 @@ caseRepository.findById(id.trim().toLowerCase()).orElse(null);
 
 ```java
 @McpArg(name = "caseId", description = "Case ID (24-char hex string) from search_cases / semantic_search", required = true)
+```
+
+### 8. MCP resources — `MedicalCaseResources`
+
+```java
+// findCase:
+if (!IdGenerator.isValidId(id)) { return null; }
+caseRepository.findById(id.trim().toLowerCase()).orElse(null);
 ```
 
 ### 8. SQL files — all `:id` bindings remain, but type changes from UUID to TEXT
@@ -112,31 +128,23 @@ No SQL syntax changes needed — `WHERE id = :id` works for both UUID and TEXT. 
 
 ## Dependency
 
-Add to `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>org.mongodb</groupId>
-    <artifactId>bson</artifactId>
-    <version>5.4.0</version>
-</dependency>
-```
+No external dependencies — `IdGenerator` is pure Java (zero imports beyond `java.*`).
 
 ## Files affected (estimated)
 
 | File | Change |
 |---|---|
-| `pom.xml` | Add `bson` dependency |
+| `pom.xml` | No change (no new dependency) |
 | `V1__init_medical_cases.sql` | `id UUID` → `id TEXT`, remove `DEFAULT` |
 | `MedicalCase.java` | `UUID id` → `String id` |
 | `CaseSummary.java` | `UUID id` → `String id` |
 | `MedicalCaseRepository.java` | `UUID` → `String` in signatures |
 | `MedicalCaseRepositoryImpl.java` | All `UUID` → `String` in method bodies |
-| `DatasetLoaderServiceImpl.java` | `UUID.randomUUID()` → `new ObjectId().toHexString()` |
-| `UuidUtils.java` → `IdUtils.java` | Rename, change validation |
-| `MedicalCaseTools.java` | `UuidUtils.parseUuid` → `IdUtils.isValidId` |
-| `MedicalCaseResources.java` | `UUID.fromString` → `IdUtils.isValidId` |
-| `MedicalCasePrompts.java` | `UuidUtils.parseUuid` → `IdUtils.isValidId`, param desc |
+| `DatasetLoaderServiceImpl.java` | `UUID.randomUUID()` → `IdGenerator.generateId()` |
+| `UuidUtils.java` → `IdGenerator.java` | Replace with ported `IdGenerator` from med-expert-match-ce |
+| `MedicalCaseTools.java` | `UuidUtils.parseUuid` → `IdGenerator.isValidId` |
+| `MedicalCaseResources.java` | `UUID.fromString` → `IdGenerator.isValidId` |
+| `MedicalCasePrompts.java` | `UuidUtils.parseUuid` → `IdGenerator.isValidId`, param desc |
 | `insert.sql` | Remove `:id` from INSERT (generated in Java now) |
 | `selectById.sql` | No change (`:id` binding works for TEXT) |
 | `updateEmbedding.sql` | No change |
