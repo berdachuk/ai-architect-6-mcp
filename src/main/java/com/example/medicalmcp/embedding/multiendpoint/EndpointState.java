@@ -1,9 +1,14 @@
 package com.example.medicalmcp.embedding.multiendpoint;
 
+import com.example.medicalmcp.embedding.service.EmbeddingHealth;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.embedding.EmbeddingResponse;
 
 public class EndpointState {
+
+    private static final List<String> PROBE = List.of("ping");
 
     private final String url;
     private final String model;
@@ -48,5 +53,16 @@ public class EndpointState {
 
     public void setSkipped(boolean skipped) {
         this.skipped = skipped;
+    }
+
+    public EmbeddingHealth ping() {
+        long start = System.currentTimeMillis();
+        try {
+            EmbeddingResponse response = embeddingModel.embedForResponse(PROBE);
+            int dimensions = response.getResults().isEmpty() ? 0 : response.getResults().get(0).getOutput().length;
+            return new EmbeddingHealth(url, model, true, dimensions, System.currentTimeMillis() - start, null);
+        } catch (Exception ex) {
+            return new EmbeddingHealth(url, model, false, 0, System.currentTimeMillis() - start, ex.getMessage());
+        }
     }
 }

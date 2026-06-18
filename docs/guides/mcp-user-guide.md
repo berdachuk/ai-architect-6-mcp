@@ -171,6 +171,25 @@ search_cases(query="pacemaker interrogation", limit=10)
 
 **When to use:** Exact terms, procedure names, or phrases that appear in long clinical notes. Best for transcription-heavy queries.
 
+**How it works (PostgreSQL FTS):** the `medical_case` table has a generated `fts` column of type `TSVECTOR` that Postgres maintains automatically from `sample_name + description + transcription + keywords` (English text-search config). `search_cases` runs `plainto_tsquery('english', :query) @@ fts` against a GIN index, then `ORDER BY ts_rank(fts, …) DESC`. That gives stemming ("interrogating" hits "interrogation"), ranking, and sub-millisecond lookups. See [docs/03-design.md §The `fts` column](../03-design.md#the-fts-column) for the schema detail.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as LLM client
+    participant H as MCP host (SSE)
+    participant S as medical-mcp-server
+    participant P as PostgreSQL
+
+    C->>H: "pacemaker interrogation"
+    H->>S: tools/call search_cases(query="pacemaker interrogation", specialty=…, limit=10)
+    S->>P: SELECT … FROM medical_case
+    Note over P: WHERE fts @@ plainto_tsquery('english', :query)<br/>AND (specialty filter) AND (split filter)<br/>ORDER BY ts_rank(fts, tsquery) DESC<br/>LIMIT :limit
+    P-->>S: rows (CaseSummary[])
+    S-->>H: CaseSummary[]
+    H-->>C: streamed response
+```
+
 ---
 
 ### `semantic_search` — vector similarity
