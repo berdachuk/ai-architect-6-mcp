@@ -17,11 +17,27 @@ spring:
         version: 1.6.0
         type: SYNC
         protocol: SSE
-        instructions: >
-          Wraps hpe-ai/medical-cases-classification-tutorial (2,464 rows, 13 specialties).
-          Use search_cases for keyword/FTS queries; semantic_search for similarity;
-          get_case to retrieve a full transcription by UUID; list_specialties to explore labels.
-          Embeddings: nomic-embed-text:v1.5 @ 768 dims.
+        instructions: |
+          ## Workflow
+
+          ### Step 1 — Explore the dataset
+          Ask about available stats or specialties using get_dataset_stats or list_specialties.
+
+          ### Step 2 — Search for cases
+          Use search_cases (keyword/FTS) or semantic_search (vector similarity) to find relevant cases.
+          Both return case IDs needed for the next steps.
+
+          ### Step 3 — Retrieve full details
+          Use get_case with a case ID from Step 2 to get the full transcription.
+
+          ### Step 4 — Analyze with prompt
+          Use case-analysis prompt with a case ID and optionally focus parameter.
+
+          ### Important
+          - get_case requires a valid case ID (24-char hex string). Obtain it from search_cases or semantic_search first.
+          - case-analysis prompt also requires a valid case ID (24-char hex string). The focus parameter controls which fields are emphasized.
+          - Focus options: description | transcription | keywords | specialty | all (default: all)
+          - When focus=specialty, the prompt includes a PREDICTED_LABEL classification block.
         sse-endpoint: /sse
         sse-message-endpoint: /mcp/message
         keep-alive-interval: 30s
@@ -33,7 +49,7 @@ spring:
         annotation-scanner:
           enabled: true
   datasource:
-    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5436/${MEDICALMCP_DB_NAME:medical_mcp}
+    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:${MEDICALMCP_DB_PORT:5436}/${MEDICALMCP_DB_NAME:medical_mcp}
     username: ${MEDICALMCP_DB_USERNAME:medical_mcp}
     password: ${MEDICALMCP_DB_PASSWORD:medical_mcp}
     driver-class-name: org.postgresql.Driver
@@ -47,6 +63,16 @@ spring:
 server:
   port: ${SERVER_PORT:8092}
   shutdown: graceful
+
+logging:
+  file:
+    name: logs/medical-mcp-server.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
+  level:
+    root: INFO
 
 management:
   endpoints:

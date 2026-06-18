@@ -1,5 +1,6 @@
 package com.example.medicalmcp.mcp;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.core.prompt.PromotedSpecialtyClassificationInstructions;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
@@ -8,7 +9,7 @@ import io.modelcontextprotocol.spec.McpSchema.PromptMessage;
 import io.modelcontextprotocol.spec.McpSchema.Role;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import org.springframework.ai.mcp.annotation.McpArg;
 import org.springframework.ai.mcp.annotation.McpPrompt;
 import org.springframework.stereotype.Component;
@@ -25,9 +26,10 @@ public class MedicalCasePrompts {
 
     @McpPrompt(
             name = "case-analysis",
-            description = "Structured prompt for LLM analysis of a medical case (dataset fields only).")
+            description =
+                    "Structured prompt for LLM analysis of a medical case. Requires a case ID (from search_cases/semantic_search). Optional focus: description | transcription | keywords | specialty | all (default: all). When focus=specialty includes PREDICTED_LABEL classification block.")
     public GetPromptResult analyzeCase(
-            @McpArg(name = "caseId", description = "Server UUID from search_cases / semantic_search", required = true)
+            @McpArg(name = "caseId", description = "Case ID (24-char hex string) from search_cases / semantic_search", required = true)
                     String caseId,
             @McpArg(
                             name = "focus",
@@ -35,8 +37,12 @@ public class MedicalCasePrompts {
                                     "Dataset field emphasis: description | transcription | keywords | specialty | all",
                             required = false)
                     String focus) {
-        UUID uuid = parseUuid(caseId);
-        MedicalCase medicalCase = uuid == null ? null : caseRepository.findById(uuid).orElse(null);
+        if (!IdGenerator.isValidId(caseId)) {
+            return GetPromptResult.builder(List.of())
+                    .description("Invalid case ID")
+                    .build();
+        }
+        MedicalCase medicalCase = caseRepository.findById(caseId.trim().toLowerCase()).orElse(null);
         if (medicalCase == null) {
             return GetPromptResult.builder(List.of())
                     .description("Case not found")
@@ -44,7 +50,7 @@ public class MedicalCasePrompts {
         }
 
         String message = buildAnalysisMessage(medicalCase, resolveFocus(focus));
-        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(null, message, java.util.Map.of()))))
+        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(null, message, Map.of()))))
                 .description("Medical case analysis template")
                 .build();
     }
@@ -103,16 +109,5 @@ public class MedicalCasePrompts {
 
     private static void appendSpecialty(StringBuilder message, MedicalCase medicalCase) {
         message.append("Medical specialty: ").append(medicalCase.medicalSpecialty()).append('\n');
-    }
-
-    private static UUID parseUuid(String id) {
-        if (!StringUtils.hasText(id)) {
-            return null;
-        }
-        try {
-            return UUID.fromString(id.trim());
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 }

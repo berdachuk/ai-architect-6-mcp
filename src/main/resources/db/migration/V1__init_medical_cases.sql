@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE TABLE medical_case (
-    id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                TEXT        PRIMARY KEY,
     sample_name       TEXT        NOT NULL,
     description       TEXT,
     transcription     TEXT,

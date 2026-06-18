@@ -109,6 +109,31 @@
 - Docs: `prompt-lab-user-guide.md`
 - **Plan archived:** `M-15-prompt-lab-live-chat.md`
 
+## 2026-06-18 — LM Studio MCP manual test (docs)
+
+- `docs/guides/lm-studio-mcp-test-report-2026-06-18.md` — google/gemma-4-26b-a4b smoke test
+- All 7 steps passed: `get_dataset_stats`, `list_specialties`, `search_cases`, `semantic_search`, `get_case`, `case-analysis` (transcription + specialty)
+- Committed and pushed to `develop`
+
+## 2026-06-18 — M-17 MCP self-description improvements
+
+- Enhanced `spring.ai.mcp.server.instructions` with 4-step workflow narrative
+- Improved tool descriptions with cross-references (e.g. "Returns case IDs that can be used with get_case")
+- Improved `case-analysis` prompt description with focus options and PREDICTED_LABEL behavior
+- **Plan archived:** `M-17-mcp-self-description-improvements.md`
+
+## 2026-06-18 — M-18 MongoDB-compatible string IDs
+
+- `IdGenerator` (ObjectId algorithm) replaces `UuidUtils` — 24-char hex, pure Java, no deps
+- `V1__init_medical_cases.sql`: `id UUID` → `id TEXT`, remove `DEFAULT gen_random_uuid()`
+- Domain records: `MedicalCase`, `CaseSummary`, `ClassificationEvalResult` — `UUID id` → `String id`
+- Repository: `findById(String)`, `updateEmbeddingsBatch(Map<String, float[]>)`
+- MCP layer: `IdGenerator.isValidId` validation, updated param descriptions
+- `application.yml` instructions: 5 "UUID" mentions → "case ID"
+- Docs: `medicalcase/AGENTS.md`, `retrieval/AGENTS.md`, `dataset/AGENTS.md` updated
+- Tests: all 21 pass with 24-char hex IDs
+- **Plan archived:** `M-18-mongodb-compatible-string-ids.md`
+
 ## Milestone status
 
 | Milestone | Status |
@@ -116,5 +141,7 @@
 | M1–M8 | ✅ Complete |
 | M9–M10 | ✅ Complete (optional) |
 | M9 ext (M-12, M-15) | ✅ Complete (optional) |
+| M-17 | ✅ Complete |
+| M-18 | ✅ Complete |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

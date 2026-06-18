@@ -7,11 +7,10 @@ import com.example.medicalmcp.medicalcase.domain.SpecialtyCount;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface MedicalCaseRepository {
 
-    Optional<MedicalCase> findById(UUID id);
+    Optional<MedicalCase> findById(String id);
 
     List<CaseSummary> fullTextSearch(String query, String specialty, String split, int limit);
 
@@ -25,7 +24,9 @@ public interface MedicalCaseRepository {
 
     List<MedicalCase> findWithoutEmbeddings();
 
+    List<MedicalCase> findWithoutEmbeddingsBySplit(String split);
+
     List<SemanticMatch> semanticSearch(float[] queryEmbedding, String specialty, int topK, double minSimilarity);
 
-    void updateEmbeddingsBatch(Map<UUID, float[]> embeddings);
+    void updateEmbeddingsBatch(Map<String, float[]> embeddings);
 }

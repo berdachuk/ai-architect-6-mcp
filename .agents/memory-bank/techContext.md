@@ -47,6 +47,6 @@ On Windows dev machines, **use WSL** to access Docker (Docker Desktop WSL2 backe
 | Artifact | Status |
 |---|---|
 | `docs/` v2.0.0 | ✅ Complete |
-| `pom.xml` / `src/` | ✅ M1 foundation |
+| `pom.xml` / `src/` | ✅ M1–M8 + M9–M15 + M-17 complete |
 | `.agents/` AI context | ✅ Bootstrapped |
-| CI workflow | ⬜ Not configured |
+| CI workflow | ✅ Configured (ci.yml + quality.yml) |

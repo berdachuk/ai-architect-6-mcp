@@ -1,15 +1,13 @@
 package com.example.medicalmcp.mcp;
 
-import com.example.medicalmcp.medicalcase.domain.DatasetStats;
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.UUID;
 import org.springframework.ai.mcp.annotation.McpResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class MedicalCaseResources {
@@ -28,7 +26,7 @@ public class MedicalCaseResources {
     @McpResource(
             uri = "medical://cases/{id}",
             name = "medical-case",
-            description = "Full medical case record (including transcription) by UUID.",
+            description = "Full medical case record (including transcription) by ID.",
             mimeType = "application/json")
     public String getCase(String id) throws JsonProcessingException {
         MedicalCase medicalCase = findCase(id);
@@ -45,17 +43,9 @@ public class MedicalCaseResources {
     }
 
     MedicalCase findCase(String id) {
-        if (!StringUtils.hasText(id)) {
+        if (!IdGenerator.isValidId(id)) {
             return null;
         }
-        try {
-            return caseRepository.findById(UUID.fromString(id.trim())).orElse(null);
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
-    DatasetStats readStats() {
-        return vectorSearch.getDatasetStats();
+        return caseRepository.findById(id.trim().toLowerCase()).orElse(null);
     }
 }

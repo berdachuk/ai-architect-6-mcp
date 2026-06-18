@@ -7,7 +7,6 @@ import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,7 @@ class FtsRetrievalQualityIntegrationTest extends AbstractPostgresIntegrationTest
         assertThat(results).allMatch(result -> "Orthopedic".equals(result.medicalSpecialty()));
     }
 
-    private static boolean containsSourceRow(List<CaseSummary> results, UUID sourceId) {
+    private static boolean containsSourceRow(List<CaseSummary> results, String sourceId) {
         return results.stream().anyMatch(result -> sourceId.equals(result.id()));
     }
 }

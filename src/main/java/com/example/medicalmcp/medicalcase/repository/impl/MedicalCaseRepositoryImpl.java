@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -48,6 +47,9 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     @InjectSql("/sql/medicalcase/findWithoutEmbeddings.sql")
     private String findWithoutEmbeddingsSql;
 
+    @InjectSql("/sql/medicalcase/findWithoutEmbeddingsBySplit.sql")
+    private String findWithoutEmbeddingsBySplitSql;
+
     @InjectSql("/sql/medicalcase/updateEmbedding.sql")
     private String updateEmbeddingSql;
 
@@ -61,7 +63,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     }
 
     @Override
-    public Optional<MedicalCase> findById(UUID id) {
+    public Optional<MedicalCase> findById(String id) {
         List<MedicalCase> rows =
                 jdbc.query(selectByIdSql, Map.of("id", id), (rs, rowNum) -> mapMedicalCase(rs));
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.getFirst());
@@ -123,6 +125,15 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     }
 
     @Override
+    public List<MedicalCase> findWithoutEmbeddingsBySplit(String split) {
+        if (!StringUtils.hasText(split) || !VALID_SPLITS.contains(split)) {
+            return List.of();
+        }
+        return jdbc.query(
+                findWithoutEmbeddingsBySplitSql, Map.of("split", split), (rs, rowNum) -> mapMedicalCase(rs));
+    }
+
+    @Override
     public List<SemanticMatch> semanticSearch(
             float[] queryEmbedding, String specialty, int topK, double minSimilarity) {
         if (queryEmbedding == null || queryEmbedding.length == 0 || topK <= 0) {
@@ -139,7 +150,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     }
 
     @Override
-    public void updateEmbeddingsBatch(Map<UUID, float[]> embeddings) {
+    public void updateEmbeddingsBatch(Map<String, float[]> embeddings) {
         if (embeddings.isEmpty()) {
             return;
         }
@@ -177,7 +188,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
 
     private static MedicalCase mapMedicalCase(ResultSet rs) throws SQLException {
         return new MedicalCase(
-                rs.getObject("id", UUID.class),
+                rs.getString("id"),
                 rs.getString("sample_name"),
                 rs.getString("description"),
                 rs.getString("transcription"),
@@ -189,7 +200,7 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
 
     private static CaseSummary mapCaseSummary(ResultSet rs) throws SQLException {
         return new CaseSummary(
-                rs.getObject("id", UUID.class),
+                rs.getString("id"),
                 rs.getString("sample_name"),
                 rs.getString("description"),
                 rs.getString("medical_specialty"),

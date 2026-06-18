@@ -32,7 +32,7 @@ medicalcase/
 
 - No dependency on `mcp`, `retrieval`, `embedding`, `dataset`
 - Repository interface is the only persistence API for other modules
-- UUID assigned at insert — not from HuggingFace
+- 24-char hex ID assigned at insert — not from HuggingFace
 
 ## Skills
 

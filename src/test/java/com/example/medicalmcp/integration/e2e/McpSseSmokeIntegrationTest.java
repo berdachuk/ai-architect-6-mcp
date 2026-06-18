@@ -18,7 +18,6 @@ import io.modelcontextprotocol.spec.McpSchema.ReadResourceRequest;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +89,7 @@ class McpSseSmokeIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void getCaseRoundTripViaSse() throws Exception {
-        UUID id = resolveCaseId("Pacemaker Interrogation");
+        String id = resolveCaseId("Pacemaker Interrogation");
 
         CallToolRequest request =
                 new CallToolRequest("get_case", McpSmokeTestSupport.args("id", id.toString()));
@@ -131,7 +130,7 @@ class McpSseSmokeIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void resourcesAndPromptResolveViaSse() throws Exception {
-        UUID id = resolveCaseId("Pacemaker Interrogation");
+        String id = resolveCaseId("Pacemaker Interrogation");
 
         String statsJson = McpSmokeTestSupport.textFromResource(
                 mcpClient.readResource(new ReadResourceRequest("medical://stats")));
@@ -151,10 +150,10 @@ class McpSseSmokeIntegrationTest extends AbstractPostgresIntegrationTest {
         assertThat(text).doesNotContain("null");
     }
 
-    private UUID resolveCaseId(String sampleName) throws Exception {
+    private String resolveCaseId(String sampleName) throws Exception {
         CallToolRequest request = new CallToolRequest(
                 "search_cases", McpSmokeTestSupport.args("query", sampleName, "limit", 1));
         JsonNode results = McpSmokeTestSupport.toJson(mcpClient.callTool(request), objectMapper);
-        return UUID.fromString(results.get(0).get("id").asText());
+        return results.get(0).get("id").asText();
     }
 }

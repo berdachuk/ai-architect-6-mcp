@@ -1,10 +1,9 @@
 package com.example.medicalmcp.medicalcase.domain;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public record MedicalCase(
-        UUID id,
+        String id,
         String sampleName,
         String description,
         String transcription,

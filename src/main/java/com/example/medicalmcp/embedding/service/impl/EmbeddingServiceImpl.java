@@ -1,6 +1,7 @@
 package com.example.medicalmcp.embedding.service.impl;
 
 import com.example.medicalmcp.embedding.multiendpoint.EmbeddingEndpointPool;
+import com.example.medicalmcp.embedding.service.EmbeddingHealth;
 import com.example.medicalmcp.embedding.service.EmbeddingService;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,11 @@ public class EmbeddingServiceImpl implements EmbeddingService {
             results.add(toFloatArray(future.join()));
         }
         return results;
+    }
+
+    @Override
+    public List<EmbeddingHealth> pingAll() {
+        return pool.pingAll();
     }
 
     @Override

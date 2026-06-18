@@ -1,5 +1,6 @@
 package com.example.medicalmcp.mcp;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.medicalcase.domain.CaseSummary;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
@@ -8,12 +9,10 @@ import com.example.medicalmcp.medicalcase.domain.SpecialtyCount;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.retrieval.service.VectorSearchService;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.ai.mcp.annotation.McpToolParam;
 import org.springframework.ai.mcp.annotation.context.McpSyncRequestContext;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 @Component
 public class MedicalCaseTools {
@@ -28,7 +27,8 @@ public class MedicalCaseTools {
 
     @McpTool(
             name = "search_cases",
-            description = "Full-text search over medical case transcriptions, descriptions, and keywords.",
+            description =
+                    "Full-text search over medical case transcriptions, descriptions, and keywords. Returns case IDs that can be used with get_case and case-analysis prompt.",
             annotations =
                     @McpTool.McpAnnotations(
                             readOnlyHint = true,
@@ -46,21 +46,21 @@ public class MedicalCaseTools {
 
     @McpTool(
             name = "get_case",
-            description = "Retrieve a single medical case by UUID, including the full transcription text.",
+            description =
+                    "Retrieve a single medical case by ID, including the full transcription text. Requires a case ID obtained from search_cases or semantic_search.",
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false),
             generateOutputSchema = true)
-    public MedicalCase getCase(@McpToolParam(description = "Case UUID", required = true) String id) {
-        UUID uuid = parseUuid(id);
-        if (uuid == null) {
+    public MedicalCase getCase(@McpToolParam(description = "Case ID (24-char hex string)", required = true) String id) {
+        if (!IdGenerator.isValidId(id)) {
             return null;
         }
-        return caseRepository.findById(uuid).orElse(null);
+        return caseRepository.findById(id.trim().toLowerCase()).orElse(null);
     }
 
     @McpTool(
             name = "semantic_search",
             description =
-                    "Vector similarity search over medical cases. Embeds the query and returns the most similar cases by cosine distance.",
+                    "Vector similarity search over medical cases. Embeds the query and returns the most similar cases by cosine distance. Returns case IDs that can be used with get_case.",
             annotations =
                     @McpTool.McpAnnotations(
                             readOnlyHint = true,
@@ -99,16 +99,5 @@ public class MedicalCaseTools {
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public DatasetStats getDatasetStats() {
         return vectorSearch.getDatasetStats();
-    }
-
-    private static UUID parseUuid(String id) {
-        if (!StringUtils.hasText(id)) {
-            return null;
-        }
-        try {
-            return UUID.fromString(id.trim());
-        } catch (IllegalArgumentException ex) {
-            return null;
-        }
     }
 }

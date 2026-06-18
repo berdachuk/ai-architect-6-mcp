@@ -9,4 +9,6 @@ public interface EmbeddingService {
     List<float[]> embedBatch(List<String> texts);
 
     String buildEmbeddingInput(String sampleName, String description, String keywords);
+
+    List<EmbeddingHealth> pingAll();
 }
