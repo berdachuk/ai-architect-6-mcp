@@ -17,16 +17,19 @@ Switch to MongoDB ObjectId-compatible 24-char hex strings (e.g. `507f1f77bcf86cd
 | Layer | Files to change |
 |---|---|
 | Flyway | `V1__init_medical_cases.sql` — `id TEXT PRIMARY KEY`, remove `DEFAULT gen_random_uuid()` |
-| Domain records | `MedicalCase`, `CaseSummary` — `UUID id` → `String id` |
+| Domain records | `MedicalCase`, `CaseSummary`, `ClassificationEvalResult` — `UUID id` → `String id` |
 | Repository API | `MedicalCaseRepository` — `findById(UUID)` → `findById(String)`, `Map<UUID, float[]>` → `Map<String, float[]>` |
 | Repository impl | `MedicalCaseRepositoryImpl` — all SQL bindings |
 | SQL files | `selectById.sql`, `insert.sql`, `updateEmbedding.sql`, `findWithoutEmbeddingsBySplit.sql`, `fullTextSearch.sql`, `semanticSearch.sql` |
 | Dataset loader | `DatasetLoaderServiceImpl` — generate 24-char hex IDs instead of `UUID.randomUUID()` |
-| Core utility | `UuidUtils` → `IdUtils` — validate 24-char hex strings |
-| MCP tools | `MedicalCaseTools` — `parseUuid` → `IdUtils.isValidId`, update param descriptions |
-| MCP resources | `MedicalCaseResources` — `findCase` uses `IdUtils` |
-| MCP prompts | `MedicalCasePrompts` — `caseId` param description |
-| Tests | All fixtures, `MedicalCasePromptsStructureTest`, integration tests |
+| Core utility | `UuidUtils` → `IdGenerator` — port from med-expert-match-ce |
+| MCP tools | `MedicalCaseTools` — `UuidUtils.parseUuid` → `IdGenerator.isValidId`, update param descriptions |
+| MCP resources | `MedicalCaseResources` — `UUID.fromString` → `IdGenerator.isValidId` |
+| MCP prompts | `MedicalCasePrompts` — `UuidUtils.parseUuid` → `IdGenerator.isValidId`, param desc |
+| Prompt lab | `MetaPromptImprovementService` — `UUID caseId` → `String caseId` |
+| Config | `application.yml` — update MCP `instructions` text (5 "UUID" mentions) |
+| Docs | `retrieval/AGENTS.md`, `medicalcase/AGENTS.md`, `dataset/AGENTS.md` — update UUID references |
+| Tests | All fixtures, `MedicalCasePromptsStructureTest`, integration tests, prompt-lab tests, `VectorSearchServiceImplTest`, `RetrievalQualityBenchmark` |
 
 ## Implementation steps
 
@@ -116,11 +119,30 @@ if (!IdGenerator.isValidId(id)) { return null; }
 caseRepository.findById(id.trim().toLowerCase()).orElse(null);
 ```
 
-### 8. SQL files — all `:id` bindings remain, but type changes from UUID to TEXT
+### 9. SQL files — all `:id` bindings remain, but type changes from UUID to TEXT
 
-No SQL syntax changes needed — `WHERE id = :id` works for both UUID and TEXT. Only the DDL changes.
+No SQL syntax changes needed — `WHERE id = :id` works for both UUID and TEXT. Only the DDL changes. `insert.sql` keeps `:id` — the ID is still inserted, just generated in Java instead of by `DEFAULT gen_random_uuid()`.
 
-### 9. Tests
+### 10. Config — `application.yml`
+
+Update MCP `instructions` text — replace all 5 "UUID" mentions with "case ID" or "24-char hex string".
+
+### 11. Prompt lab — `ClassificationEvalResult`, `MetaPromptImprovementService`
+
+```java
+public record ClassificationEvalResult(
+    String caseId,  // was UUID
+    ...
+) {}
+```
+
+`MetaPromptImprovementService` — `UUID caseId` → `String caseId` in method signatures.
+
+### 12. Docs — AGENTS.md files
+
+Update `retrieval/AGENTS.md`, `medicalcase/AGENTS.md`, `dataset/AGENTS.md` — replace UUID references.
+
+### 13. Tests
 
 - Update all test fixtures to use 24-char hex IDs
 - `MedicalCasePromptsStructureTest` — update ID assertions
@@ -145,14 +167,25 @@ No external dependencies — `IdGenerator` is pure Java (zero imports beyond `ja
 | `MedicalCaseTools.java` | `UuidUtils.parseUuid` → `IdGenerator.isValidId` |
 | `MedicalCaseResources.java` | `UUID.fromString` → `IdGenerator.isValidId` |
 | `MedicalCasePrompts.java` | `UuidUtils.parseUuid` → `IdGenerator.isValidId`, param desc |
-| `insert.sql` | Remove `:id` from INSERT (generated in Java now) |
+| `insert.sql` | No change (`:id` binding works for TEXT; ID generated in Java) |
 | `selectById.sql` | No change (`:id` binding works for TEXT) |
 | `updateEmbedding.sql` | No change |
 | `findWithoutEmbeddingsBySplit.sql` | No change |
 | `fullTextSearch.sql` | No change |
 | `semanticSearch.sql` | No change |
+| `ClassificationEvalResult.java` | `UUID caseId` → `String caseId` |
+| `MetaPromptImprovementService.java` | `UUID caseId` → `String caseId` in method signatures |
+| `application.yml` | Update MCP `instructions` text (5 "UUID" mentions) |
+| `retrieval/AGENTS.md` | Update UUID reference |
+| `medicalcase/AGENTS.md` | Update UUID reference |
+| `dataset/AGENTS.md` | Update UUID reference |
 | All test fixtures | Replace UUIDs with 24-char hex strings |
 | `MedicalCasePromptsStructureTest` | Update ID assertions |
+| `ChatPromptLabClassificationClientTest` | Replace `UUID.randomUUID()` in `MedicalCase` constructor |
+| `MetaPromptImprovementServiceTest` | Replace `UUID` in `MedicalCase` constructor |
+| `SpecialtyClassificationEvaluatorTest` | Replace `UUID.randomUUID()` in `MedicalCase` constructor |
+| `VectorSearchServiceImplTest` | Replace `UUID.randomUUID()` in `CaseSummary` constructor |
+| `RetrievalQualityBenchmark` | `UUID` → `String` in `containsId`/`reciprocalRank` signatures |
 | Integration tests | Update UUID references |
 
 ## Acceptance criteria
