@@ -25,7 +25,8 @@ public class MedicalCasePrompts {
 
     @McpPrompt(
             name = "case-analysis",
-            description = "Structured prompt for LLM analysis of a medical case (dataset fields only).")
+            description =
+                    "[Step 4] Structured prompt for LLM analysis of a medical case. Requires a case UUID (from search_cases/semantic_search). Optional focus: description | transcription | keywords | specialty | all (default: all). When focus=specialty includes PREDICTED_LABEL classification block.")
     public GetPromptResult analyzeCase(
             @McpArg(name = "caseId", description = "Server UUID from search_cases / semantic_search", required = true)
                     String caseId,

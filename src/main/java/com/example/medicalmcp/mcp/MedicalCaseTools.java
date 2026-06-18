@@ -28,7 +28,8 @@ public class MedicalCaseTools {
 
     @McpTool(
             name = "search_cases",
-            description = "Full-text search over medical case transcriptions, descriptions, and keywords.",
+            description =
+                    "[Step 2] Full-text search over medical case transcriptions, descriptions, and keywords. Returns case IDs (UUIDs) that can be used with get_case and case-analysis prompt.",
             annotations =
                     @McpTool.McpAnnotations(
                             readOnlyHint = true,
@@ -46,7 +47,8 @@ public class MedicalCaseTools {
 
     @McpTool(
             name = "get_case",
-            description = "Retrieve a single medical case by UUID, including the full transcription text.",
+            description =
+                    "[Step 3] Retrieve a single medical case by UUID, including the full transcription text. Requires a UUID obtained from search_cases or semantic_search.",
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false),
             generateOutputSchema = true)
     public MedicalCase getCase(@McpToolParam(description = "Case UUID", required = true) String id) {
@@ -60,7 +62,7 @@ public class MedicalCaseTools {
     @McpTool(
             name = "semantic_search",
             description =
-                    "Vector similarity search over medical cases. Embeds the query and returns the most similar cases by cosine distance.",
+                    "[Step 2] Vector similarity search over medical cases. Embeds the query and returns the most similar cases by cosine distance. Returns case IDs (UUIDs) that can be used with get_case.",
             annotations =
                     @McpTool.McpAnnotations(
                             readOnlyHint = true,
@@ -86,7 +88,7 @@ public class MedicalCaseTools {
 
     @McpTool(
             name = "list_specialties",
-            description = "List all medical specialties present in the dataset with case counts.",
+            description = "[Step 1] List all medical specialties present in the dataset with case counts.",
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public List<SpecialtyCount> listSpecialties() {
         return vectorSearch.listSpecialties();
@@ -95,7 +97,7 @@ public class MedicalCaseTools {
     @McpTool(
             name = "get_dataset_stats",
             description =
-                    "Return dataset statistics: total cases, breakdown by specialty and by split (train/validation/test).",
+                    "[Step 1] Return dataset statistics: total cases, breakdown by specialty and by split (train/validation/test).",
             annotations = @McpTool.McpAnnotations(readOnlyHint = true, destructiveHint = false))
     public DatasetStats getDatasetStats() {
         return vectorSearch.getDatasetStats();
