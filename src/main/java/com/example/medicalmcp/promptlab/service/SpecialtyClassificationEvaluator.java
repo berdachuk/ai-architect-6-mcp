@@ -1,6 +1,7 @@
 package com.example.medicalmcp.promptlab.service;
 
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
+import com.example.medicalmcp.promptlab.domain.ClassificationEvalOutcome;
 import com.example.medicalmcp.promptlab.domain.ClassificationEvalResult;
 import com.example.medicalmcp.promptlab.domain.ClassificationEvalSummary;
 import com.example.medicalmcp.promptlab.eval.PredictedLabelExtractor;
@@ -13,7 +14,7 @@ import java.util.function.Function;
 
 public class SpecialtyClassificationEvaluator {
 
-    public ClassificationEvalSummary evaluate(
+    public ClassificationEvalOutcome evaluate(
             String templateId, String split, List<MedicalCase> cases, Function<MedicalCase, String> classifier) {
         List<ClassificationEvalResult> results = new ArrayList<>(cases.size());
         Map<String, Long> errors = new HashMap<>();
@@ -32,6 +33,8 @@ public class SpecialtyClassificationEvaluator {
 
         long correctCount = results.stream().filter(ClassificationEvalResult::correct).count();
         double accuracy = cases.isEmpty() ? 0.0 : (double) correctCount / cases.size();
-        return new ClassificationEvalSummary(templateId, split, cases.size(), (int) correctCount, accuracy, Map.copyOf(errors));
+        ClassificationEvalSummary summary =
+                new ClassificationEvalSummary(templateId, split, cases.size(), (int) correctCount, accuracy, Map.copyOf(errors));
+        return new ClassificationEvalOutcome(summary, List.copyOf(results));
     }
 }

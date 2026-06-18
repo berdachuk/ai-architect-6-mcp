@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5436/${MEDICALMCP_DB_NAME:medical_mcp}
+
+medicalmcp:
+  embedding:
+    multi-endpoint:
+      endpoints:
+        - url: ${EMBEDDING_BASE_URL:http://localhost:11434}
+          model: ${EMBEDDING_MODEL:nomic-embed-text:v1.5}
+          priority: 0
+  dataset:
+    loader:
+      enabled: ${MEDICALMCP_DATASET_LOADER_ENABLED:false}

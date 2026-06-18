@@ -49,7 +49,8 @@ class PromptLabOfflineEvalIntegrationTest extends AbstractPostgresIntegrationTes
                 "react_self_reflection",
                 promptLabProperties.getEvalSplit(),
                 cases,
-                OfflineClassificationSimulator::accurateOutput);
+                OfflineClassificationSimulator::accurateOutput)
+                .summary();
 
         PromptLabQualityReporter.mergePromptLabMetrics(summary, promptLabProperties.getMinAccuracy());
 
@@ -61,7 +62,8 @@ class PromptLabOfflineEvalIntegrationTest extends AbstractPostgresIntegrationTes
     void badTemplateFailsOfflineGate() {
         List<MedicalCase> cases = loadValidationCases();
         ClassificationEvalSummary summary = evaluator.evaluate(
-                "bad", promptLabProperties.getEvalSplit(), cases, OfflineClassificationSimulator::badOutput);
+                "bad", promptLabProperties.getEvalSplit(), cases, OfflineClassificationSimulator::badOutput)
+                .summary();
 
         assertThat(summary.meetsGate(promptLabProperties.getMinAccuracy())).isFalse();
     }

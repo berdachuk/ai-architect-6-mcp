@@ -44,7 +44,7 @@ public class MedicalCasePrompts {
         }
 
         String message = buildAnalysisMessage(medicalCase, resolveFocus(focus));
-        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(message))))
+        return GetPromptResult.builder(List.of(new PromptMessage(Role.USER, new TextContent(null, message, java.util.Map.of()))))
                 .description("Medical case analysis template")
                 .build();
     }

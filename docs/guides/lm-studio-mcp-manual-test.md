@@ -10,12 +10,12 @@ Step-by-step guide to connect **LM Studio** as an MCP host to **medical-mcp-serv
 
 ## Overview
 
-| Component | Role |
-|---|---|
-| **LM Studio** | MCP host — local chat model + tool calling |
-| **medical-mcp-server** | Remote SSE MCP server — dataset tools on port 8092 |
-| **PostgreSQL + pgvector** | Case storage and vector index |
-| **Ollama** | Embedding API for `semantic_search` only (`nomic-embed-text:v1.5`) |
+| Component                 | Role                                                               |
+|---------------------------|--------------------------------------------------------------------|
+| **LM Studio**             | MCP host — local chat model + tool calling                         |
+| **medical-mcp-server**    | Remote SSE MCP server — dataset tools on port 8092                 |
+| **PostgreSQL + pgvector** | Case storage and vector index                                      |
+| **Ollama**                | Embedding API for `semantic_search` only (`nomic-embed-text:v1.5`) |
 
 LM Studio does **not** replace Ollama for embeddings. The MCP server calls Ollama independently when you use `semantic_search`. See [01-requirements.md §3](../01-requirements.md#3-embedding-model).
 
@@ -56,7 +56,7 @@ docker compose up --build
 ### Option B — Local development
 
 ```bash
-# Postgres with pgvector on :5432
+# Postgres with pgvector on :5436
 ollama pull nomic-embed-text:v1.5
 mvn spring-boot:run
 ```
@@ -75,10 +75,10 @@ Wait for first-time dataset download and embedding pass to finish (watch server 
 
 ### File location
 
-| OS | Path |
-|---|---|
-| Windows | `%USERPROFILE%\.lmstudio\mcp.json` |
-| macOS / Linux | `~/.lmstudio/mcp.json` |
+| OS            | Path                               |
+|---------------|------------------------------------|
+| Windows       | `%USERPROFILE%\.lmstudio\mcp.json` |
+| macOS / Linux | `~/.lmstudio/mcp.json`             |
 
 ### In-app editor
 
@@ -102,9 +102,9 @@ Save the file. LM Studio reloads MCP servers automatically.
 
 **Endpoints (from server config):**
 
-| Path | Purpose |
-|---|---|
-| `/sse` | SSE transport (use this in `mcp.json`) |
+| Path           | Purpose                                      |
+|----------------|----------------------------------------------|
+| `/sse`         | SSE transport (use this in `mcp.json`)       |
 | `/mcp/message` | Message endpoint (handled by client library) |
 
 Do **not** use `/mcp` alone — you will get 404.
@@ -132,15 +132,15 @@ Compare with Claude Desktop guide: [claude-desktop-mcp.md](claude-desktop-mcp.md
 
 Mirror of [04-testing.md §11](../04-testing.md#11-manual-smoke-checklist-m7). Send natural-language prompts; the model should call the listed MCP capability.
 
-| Step | Suggested user message | Expected MCP call |
-|---:|---|---|
-| 1 | “What medical dataset stats are available?” | `get_dataset_stats` |
-| 2 | “List all medical specialties and their case counts.” | `list_specialties` |
-| 3 | “Search for cases about pacemaker interrogation.” | `search_cases` |
-| 4 | “Find cases semantically similar to: pacemaker device check.” | `semantic_search` |
-| 5 | “Get the full case details for UUID `<paste-from-step-3>`.” | `get_case` |
-| 6 | “Use the case-analysis prompt for that case with focus transcription.” | `case-analysis` prompt |
-| 7 | “Run case-analysis on the same case with focus specialty.” | `case-analysis` — includes `PREDICTED_LABEL` block |
+| Step  | Suggested user message                                                 | Expected MCP call                                  |
+|------:|------------------------------------------------------------------------|----------------------------------------------------|
+|     1 | “What medical dataset stats are available?”                            | `get_dataset_stats`                                |
+|     2 | “List all medical specialties and their case counts.”                  | `list_specialties`                                 |
+|     3 | “Search for cases about pacemaker interrogation.”                      | `search_cases`                                     |
+|     4 | “Find cases semantically similar to: pacemaker device check.”          | `semantic_search`                                  |
+|     5 | “Get the full case details for UUID `<paste-from-step-3>`.”            | `get_case`                                         |
+|     6 | “Use the case-analysis prompt for that case with focus transcription.” | `case-analysis` prompt                             |
+|     7 | “Run case-analysis on the same case with focus specialty.”             | `case-analysis` — includes `PREDICTED_LABEL` block |
 
 ### Pass criteria
 
@@ -178,14 +178,14 @@ mvn verify -Pintegration  # Full Testcontainers contract tests
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---|---|
-| MCP server not in LM Studio list | Validate JSON syntax; restart LM Studio |
-| Connection refused on `:8092` | Start server; check `SERVER_PORT` |
-| `semantic_search` always empty | Start Ollama; wait for embedding pass in logs |
-| Model stops mid-response | Reduce `limit`/`topK`; use shorter `focus` |
-| 404 on MCP URL | Use `http://localhost:8092/sse` exactly |
-| Wrong specialty filter results | Use exact labels from step 2 (`list_specialties`) |
+| Symptom                          | Fix                                               |
+|----------------------------------|---------------------------------------------------|
+| MCP server not in LM Studio list | Validate JSON syntax; restart LM Studio           |
+| Connection refused on `:8092`    | Start server; check `SERVER_PORT`                 |
+| `semantic_search` always empty   | Start Ollama; wait for embedding pass in logs     |
+| Model stops mid-response         | Reduce `limit`/`topK`; use shorter `focus`        |
+| 404 on MCP URL                   | Use `http://localhost:8092/sse` exactly           |
+| Wrong specialty filter results   | Use exact labels from step 2 (`list_specialties`) |
 
 ---
 

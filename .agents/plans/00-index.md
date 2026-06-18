@@ -15,11 +15,13 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-09-docker-quality-gate.md](archive/M-09-docker-quality-gate.md) | M8 | ✅ Archived |
 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) | M9 | ✅ Archived |
 | [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) | M10 | ✅ Archived |
+| [archive/M-12-meta-prompting-lab.md](archive/M-12-meta-prompting-lab.md) | M9 ext | ✅ Archived |
 | [archive/M-13-user-guides.md](archive/M-13-user-guides.md) | Docs | ✅ Archived |
 | [archive/M-14-claude-desktop-mcp.md](archive/M-14-claude-desktop-mcp.md) | Docs | ✅ Archived |
-| [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) | M9 ext | ⬜ **Active** |
+| [archive/M-15-prompt-lab-live-chat.md](archive/M-15-prompt-lab-live-chat.md) | M9 ext | ✅ Archived |
+| [M-16-ci-combined-quality-gates.md](M-16-ci-combined-quality-gates.md) | Ops | ⬜ **Active** |
 
-**Chain:** M-12 (optional meta-prompting MCP tools)
+**Chain:** M-16 (CI combined retrieval + prompt-lab gates)
 
 Completed plans are moved to `archive/` when no longer active.
 
@@ -42,7 +44,8 @@ Completed plans are moved to `archive/` when no longer active.
 - `mvn test` — unit + Modulith (no Docker)
 - `mvn verify -Pintegration` — Testcontainers; run from **WSL** on Windows
 - `mvn verify -Pquality` — full test-split benchmarks (M8+)
-- `mvn verify -Pprompt-lab` — offline prompt-lab eval (M9+)
+- `mvn verify -Pprompt-lab` — prompt-lab eval + MCP tools IT
+- `mvn verify -Pprompt-lab-quality` — retrieval + prompt-lab test-split gates
 
 ## Optional (future)
 
@@ -50,9 +53,11 @@ Completed plans are moved to `archive/` when no longer active.
 |---|---|---|
 | M-10 prompt-lab | M9 | [archive/M-10-prompt-lab.md](archive/M-10-prompt-lab.md) |
 | M-11 prompt integration | M10 | [archive/M-11-prompt-integration.md](archive/M-11-prompt-integration.md) |
-| M-12 meta-prompting lab | M9 ext | [M-12-meta-prompting-lab.md](M-12-meta-prompting-lab.md) |
+| M-12 meta-prompting lab | M9 ext | [archive/M-12-meta-prompting-lab.md](archive/M-12-meta-prompting-lab.md) |
 | M-13 user guides | Docs | [archive/M-13-user-guides.md](archive/M-13-user-guides.md) |
 | M-14 Claude Desktop guide | Docs | [archive/M-14-claude-desktop-mcp.md](archive/M-14-claude-desktop-mcp.md) |
+| M-15 live chat + test gate | M9 ext | [archive/M-15-prompt-lab-live-chat.md](archive/M-15-prompt-lab-live-chat.md) |
+| M-16 CI combined gates | Ops | [M-16-ci-combined-quality-gates.md](M-16-ci-combined-quality-gates.md) |
 
 ## User guides
 

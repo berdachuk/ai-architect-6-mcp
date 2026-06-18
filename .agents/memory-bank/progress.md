@@ -95,12 +95,26 @@
 - `docs/guides/claude-desktop-mcp.md` — config, smoke checklist, Windows MSIX notes
 - Plan archived: `M-14-claude-desktop-mcp.md`
 
+## 2026-06-16 — M12 Meta-prompting lab (M9 ext)
+
+- `PromptLabTools` MCP (5 lab tools), `MetaPromptImprovementService`, offline stub classifier
+- CI `prompt-lab` job; plan archived: `M-12-meta-prompting-lab.md`
+
+## 2026-06-16 — M-15 Prompt-lab live chat + test gate
+
+- `ChatPromptLabClassificationClient` (Ollama/OpenAI via `OpenAiChatModel` when `chat.enabled=true`)
+- `OfflinePromptLabClassificationClient` remains default (`chat.enabled=false`)
+- `PromptLabGateIntegrationTest` on `test-sample-10.csv`
+- Maven `-Pprompt-lab-quality` profile for combined retrieval + prompt-lab gates
+- Docs: `prompt-lab-user-guide.md`
+- **Plan archived:** `M-15-prompt-lab-live-chat.md`
+
 ## Milestone status
 
 | Milestone | Status |
 |---|---|
 | M1–M8 | ✅ Complete |
 | M9–M10 | ✅ Complete (optional) |
-| M9 ext (M-12) | ⬜ Optional (meta-prompting lab) |
+| M9 ext (M-12, M-15) | ✅ Complete (optional) |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)
