@@ -4,11 +4,11 @@
 
 ## Current focus
 
-**M-17 complete** — MCP self-description improvements: enhanced `instructions` with 4-step workflow, improved tool/prompt descriptions with cross-references.
+**M-18 complete** — MongoDB-compatible 24-char hex string IDs via `IdGenerator` (ObjectId algorithm). `UuidUtils` removed, all domain records, repository, MCP layer, tests updated.
 
 **Active plan:** **M-16** — CI combined quality gates ([plan](../plans/M-16-ci-combined-quality-gates.md)).
 
-Core M1–M8 and optional M9–M15 complete. User guides complete. M-17 complete.
+Core M1–M8 and optional M9–M15 complete. User guides complete. M-17, M-18 complete.
 
 ## Verified
 

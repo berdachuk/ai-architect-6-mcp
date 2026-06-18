@@ -122,6 +122,18 @@
 - Improved `case-analysis` prompt description with focus options and PREDICTED_LABEL behavior
 - **Plan archived:** `M-17-mcp-self-description-improvements.md`
 
+## 2026-06-18 — M-18 MongoDB-compatible string IDs
+
+- `IdGenerator` (ObjectId algorithm) replaces `UuidUtils` — 24-char hex, pure Java, no deps
+- `V1__init_medical_cases.sql`: `id UUID` → `id TEXT`, remove `DEFAULT gen_random_uuid()`
+- Domain records: `MedicalCase`, `CaseSummary`, `ClassificationEvalResult` — `UUID id` → `String id`
+- Repository: `findById(String)`, `updateEmbeddingsBatch(Map<String, float[]>)`
+- MCP layer: `IdGenerator.isValidId` validation, updated param descriptions
+- `application.yml` instructions: 5 "UUID" mentions → "case ID"
+- Docs: `medicalcase/AGENTS.md`, `retrieval/AGENTS.md`, `dataset/AGENTS.md` updated
+- Tests: all 21 pass with 24-char hex IDs
+- **Plan archived:** `M-18-mongodb-compatible-string-ids.md`
+
 ## Milestone status
 
 | Milestone | Status |
@@ -130,5 +142,6 @@
 | M9–M10 | ✅ Complete (optional) |
 | M9 ext (M-12, M-15) | ✅ Complete (optional) |
 | M-17 | ✅ Complete |
+| M-18 | ✅ Complete |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)

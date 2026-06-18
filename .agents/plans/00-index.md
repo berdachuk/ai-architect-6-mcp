@@ -20,10 +20,10 @@ Milestone implementation plans for AI-assisted development. Canonical milestone 
 | [archive/M-14-claude-desktop-mcp.md](archive/M-14-claude-desktop-mcp.md) | Docs | ✅ Archived |
 | [archive/M-15-prompt-lab-live-chat.md](archive/M-15-prompt-lab-live-chat.md) | M9 ext | ✅ Archived |
 | [archive/M-17-mcp-self-description-improvements.md](archive/M-17-mcp-self-description-improvements.md) | M-17 | ✅ Archived |
+| [archive/M-18-mongodb-compatible-string-ids.md](archive/M-18-mongodb-compatible-string-ids.md) | M-18 | ✅ Archived |
 | [M-16-ci-combined-quality-gates.md](M-16-ci-combined-quality-gates.md) | Ops | ⬜ **Active** |
-| [M-18-mongodb-compatible-string-ids.md](M-18-mongodb-compatible-string-ids.md) | M-18 | ⬜ **Active** |
 
-**Chain:** M-16 (CI combined retrieval + prompt-lab gates), M-18 (MongoDB-compatible string IDs)
+**Chain:** M-16 (CI combined retrieval + prompt-lab gates)
 
 Completed plans are moved to `archive/` when no longer active.
 
