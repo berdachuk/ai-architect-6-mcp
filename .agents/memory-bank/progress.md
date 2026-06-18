@@ -115,6 +115,13 @@
 - All 7 steps passed: `get_dataset_stats`, `list_specialties`, `search_cases`, `semantic_search`, `get_case`, `case-analysis` (transcription + specialty)
 - Committed and pushed to `develop`
 
+## 2026-06-18 — M-17 MCP self-description improvements
+
+- Enhanced `spring.ai.mcp.server.instructions` with 4-step workflow narrative
+- Improved tool descriptions with cross-references (e.g. "Returns case IDs that can be used with get_case")
+- Improved `case-analysis` prompt description with focus options and PREDICTED_LABEL behavior
+- **Plan archived:** `M-17-mcp-self-description-improvements.md`
+
 ## Milestone status
 
 | Milestone | Status |
@@ -122,5 +129,6 @@
 | M1–M8 | ✅ Complete |
 | M9–M10 | ✅ Complete (optional) |
 | M9 ext (M-12, M-15) | ✅ Complete (optional) |
+| M-17 | ✅ Complete |
 
 Canonical milestone table: [docs/01-requirements.md §14](../docs/01-requirements.md#14-milestones)
