@@ -17,7 +17,7 @@ Spec: `docs/01-requirements.md` §7
 
 ## Constraints
 
-- HF columns only — assign UUID and `split` server-side
+- HF columns only — assign 24-char hex ID and `split` server-side
 - Do not expose loader as MCP tool (startup `CommandLineRunner` or profile)
 - No MCP or HTTP surface in this module
 

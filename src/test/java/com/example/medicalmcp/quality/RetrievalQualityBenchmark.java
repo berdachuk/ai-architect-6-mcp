@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 import org.springframework.util.StringUtils;
 
 public final class RetrievalQualityBenchmark {
@@ -121,11 +120,11 @@ public final class RetrievalQualityBenchmark {
                 "mean_similarity_at_1", similaritySum / n);
     }
 
-    private static boolean containsId(List<CaseSummary> results, UUID id) {
+    private static boolean containsId(List<CaseSummary> results, String id) {
         return results.stream().anyMatch(result -> id.equals(result.id()));
     }
 
-    private static double reciprocalRank(List<CaseSummary> results, UUID id) {
+    private static double reciprocalRank(List<CaseSummary> results, String id) {
         for (int i = 0; i < results.size(); i++) {
             if (id.equals(results.get(i).id())) {
                 return 1.0 / (i + 1);

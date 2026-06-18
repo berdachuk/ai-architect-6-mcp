@@ -1,5 +1,6 @@
 package com.example.medicalmcp.dataset.service.impl;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.dataset.config.DatasetLoaderProperties;
 import com.example.medicalmcp.dataset.service.DatasetLoaderService;
 import com.example.medicalmcp.embedding.service.EmbeddingService;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -118,7 +118,7 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
                                 medicalCase.sampleName(), medicalCase.description(), medicalCase.keywords()))
                         .toList();
                 List<float[]> embeddings = embeddingService.embedBatch(texts);
-                Map<UUID, float[]> updates = new HashMap<>();
+                Map<String, float[]> updates = new HashMap<>();
                 for (int j = 0; j < batch.size(); j++) {
                     updates.put(batch.get(j).id(), embeddings.get(j));
                 }
@@ -164,7 +164,7 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
     private static MedicalCase toMedicalCase(CSVRecord record, String split) {
         String keywords = blankToNull(record.get("keywords"));
         return new MedicalCase(
-                UUID.randomUUID(),
+                IdGenerator.generateId(),
                 record.get("sample_name"),
                 record.get("description"),
                 record.get("transcription"),

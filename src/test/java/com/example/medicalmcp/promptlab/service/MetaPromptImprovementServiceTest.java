@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.example.medicalmcp.medicalcase.repository.MedicalCaseRepository;
 import com.example.medicalmcp.promptlab.config.PromptLabProperties;
@@ -15,7 +16,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +43,7 @@ class MetaPromptImprovementServiceTest {
 
     @Test
     void improvedPromptIncludesFailureContext() {
-        UUID caseId = UUID.randomUUID();
+        String caseId = IdGenerator.generateId();
         MedicalCase medicalCase = sampleCase(caseId);
         when(medicalCaseRepository.findById(any())).thenReturn(Optional.of(medicalCase));
 
@@ -61,7 +61,7 @@ class MetaPromptImprovementServiceTest {
         assertThat(improved.templateId()).startsWith("bad-meta-");
     }
 
-    private static MedicalCase sampleCase(UUID id) {
+    private static MedicalCase sampleCase(String id) {
         return new MedicalCase(
                 id, "Knee", "Pain", "Note", "Orthopedic", "knee", "validation", Instant.now());
     }
