@@ -9,7 +9,6 @@ import com.example.medicalmcp.mcp.MedicalCaseTools;
 import com.example.medicalmcp.medicalcase.domain.DatasetStats;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ class McpResourcesIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void medicalCaseResourceReturnsFullRecord() throws Exception {
-        UUID id = medicalCaseTools
+        String id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();

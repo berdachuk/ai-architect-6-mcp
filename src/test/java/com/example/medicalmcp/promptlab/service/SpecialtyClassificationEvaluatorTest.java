@@ -2,10 +2,10 @@ package com.example.medicalmcp.promptlab.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class SpecialtyClassificationEvaluatorTest {
@@ -13,7 +13,7 @@ class SpecialtyClassificationEvaluatorTest {
     @Test
     void computesAccuracyFromOfflineSimulator() {
         MedicalCase orthopedic = new MedicalCase(
-                UUID.randomUUID(),
+                IdGenerator.generateId(),
                 "Knee aspiration",
                 "Knee pain",
                 "Procedure note",

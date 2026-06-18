@@ -5,10 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.example.medicalmcp.core.util.IdGenerator;
 import com.example.medicalmcp.medicalcase.domain.MedicalCase;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +35,7 @@ class ChatPromptLabClassificationClientTest {
 
         ChatPromptLabClassificationClient client = new ChatPromptLabClassificationClient(chatModel);
         MedicalCase medicalCase = new MedicalCase(
-                UUID.randomUUID(),
+                IdGenerator.generateId(),
                 "Case A",
                 "Cardiology case",
                 "Patient chest pain",

@@ -16,7 +16,7 @@ Search and stats: `VectorSearchService` — FTS (`tsvector`), pgvector cosine AN
 | Specialty list | `list_specialties` |
 | Stats | `get_dataset_stats` |
 
-`get_case` uses `MedicalCaseRepository.findById` — may live in repository or thin delegation via retrieval; keep UUID lookup in repository layer.
+`get_case` uses `MedicalCaseRepository.findById` — may live in repository or thin delegation via retrieval; keep ID lookup in repository layer.
 
 ## Constraints
 

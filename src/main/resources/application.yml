@@ -25,17 +25,17 @@ spring:
 
           ### Step 2 — Search for cases
           Use search_cases (keyword/FTS) or semantic_search (vector similarity) to find relevant cases.
-          Both return case UUIDs needed for the next steps.
+          Both return case IDs needed for the next steps.
 
           ### Step 3 — Retrieve full details
-          Use get_case with a UUID from Step 2 to get the full transcription.
+          Use get_case with a case ID from Step 2 to get the full transcription.
 
           ### Step 4 — Analyze with prompt
-          Use case-analysis prompt with a UUID and optionally focus parameter.
+          Use case-analysis prompt with a case ID and optionally focus parameter.
 
           ### Important
-          - get_case requires a valid UUID (id parameter). Obtain it from search_cases or semantic_search first.
-          - case-analysis prompt also requires a valid UUID (caseId). The focus parameter controls which fields are emphasized.
+          - get_case requires a valid case ID (24-char hex string). Obtain it from search_cases or semantic_search first.
+          - case-analysis prompt also requires a valid case ID (24-char hex string). The focus parameter controls which fields are emphasized.
           - Focus options: description | transcription | keywords | specialty | all (default: all)
           - When focus=specialty, the prompt includes a PREDICTED_LABEL classification block.
         sse-endpoint: /sse

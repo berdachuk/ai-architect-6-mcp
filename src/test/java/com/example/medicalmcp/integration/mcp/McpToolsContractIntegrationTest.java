@@ -15,7 +15,6 @@ import com.example.medicalmcp.integration.AbstractPostgresIntegrationTest;
 import io.modelcontextprotocol.spec.McpSchema.GetPromptResult;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +57,7 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void getCaseReturnsFullMedicalCase() {
-        UUID id = medicalCaseTools
+        String id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();
@@ -115,7 +114,7 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void caseAnalysisPromptIncludesTranscriptionWhenFocused() {
-        UUID id = medicalCaseTools
+        String id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();
@@ -131,7 +130,7 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void caseAnalysisPromptAllFocusModesReturnStructuredTemplate() {
-        UUID id = medicalCaseTools
+        String id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();
@@ -147,7 +146,7 @@ class McpToolsContractIntegrationTest extends AbstractPostgresIntegrationTest {
 
     @Test
     void caseAnalysisPromptSpecialtyFocusIncludesPromotedTemplate() {
-        UUID id = medicalCaseTools
+        String id = medicalCaseTools
                 .searchCases("Pacemaker Interrogation", null, null, 1)
                 .getFirst()
                 .id();
