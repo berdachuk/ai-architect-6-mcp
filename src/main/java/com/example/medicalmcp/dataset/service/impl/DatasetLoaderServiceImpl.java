@@ -30,6 +30,8 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
 
     private static final Logger log = LoggerFactory.getLogger(DatasetLoaderServiceImpl.class);
 
+    private static final List<String> SPLIT_ORDER = List.of("train", "validation", "test");
+
     private final MedicalCaseRepository repository;
     private final EmbeddingService embeddingService;
     private final DatasetLoaderProperties properties;
@@ -70,6 +72,7 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
         String split = inferSplit(location);
         log.info("Loading dataset split '{}' from {}", split, location);
 
+        int inserted = 0;
         try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8);
                 CSVParser parser = CSVFormat.DEFAULT.builder()
                         .setHeader()
@@ -81,40 +84,66 @@ public class DatasetLoaderServiceImpl implements DatasetLoaderService {
                 batch.add(toMedicalCase(record, split));
                 if (batch.size() >= properties.getBatchSize()) {
                     repository.insertBatch(batch);
+                    inserted += batch.size();
                     batch.clear();
                 }
             }
-            repository.insertBatch(batch);
+            if (!batch.isEmpty()) {
+                repository.insertBatch(batch);
+                inserted += batch.size();
+            }
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to load dataset from " + location, ex);
         }
+        log.info("Loaded split '{}': {} rows inserted", split, inserted);
     }
 
     private void embedMissingCases() {
-        List<MedicalCase> missing = repository.findWithoutEmbeddings();
-        if (missing.isEmpty()) {
-            return;
-        }
-        log.info("Embedding pass: {} rows without vectors", missing.size());
+        log.info("Embedding pass: scanning {} total rows across splits {}", repository.countAll(), SPLIT_ORDER);
 
-        int processed = 0;
-        for (int i = 0; i < missing.size(); i += properties.getBatchSize()) {
-            int end = Math.min(i + properties.getBatchSize(), missing.size());
-            List<MedicalCase> batch = missing.subList(i, end);
-            List<String> texts = batch.stream()
-                    .map(medicalCase -> embeddingService.buildEmbeddingInput(
-                            medicalCase.sampleName(), medicalCase.description(), medicalCase.keywords()))
-                    .toList();
-            List<float[]> embeddings = embeddingService.embedBatch(texts);
-            Map<UUID, float[]> updates = new HashMap<>();
-            for (int j = 0; j < batch.size(); j++) {
-                updates.put(batch.get(j).id(), embeddings.get(j));
+        int totalProcessed = 0;
+        for (String split : SPLIT_ORDER) {
+            List<MedicalCase> missing = repository.findWithoutEmbeddingsBySplit(split);
+            if (missing.isEmpty()) {
+                log.info("Embedding pass [{}]: 0 rows pending (already embedded)", split);
+                continue;
             }
-            repository.updateEmbeddingsBatch(updates);
-            processed += batch.size();
-            if (processed % 100 == 0 || processed == missing.size()) {
-                log.info("Embedding pass progress: {}/{}", processed, missing.size());
+            log.info("Embedding pass [{}]: starting {} row(s)", split, missing.size());
+            int processed = 0;
+            for (int i = 0; i < missing.size(); i += properties.getBatchSize()) {
+                int end = Math.min(i + properties.getBatchSize(), missing.size());
+                List<MedicalCase> batch = missing.subList(i, end);
+                List<String> texts = batch.stream()
+                        .map(medicalCase -> embeddingService.buildEmbeddingInput(
+                                medicalCase.sampleName(), medicalCase.description(), medicalCase.keywords()))
+                        .toList();
+                List<float[]> embeddings = embeddingService.embedBatch(texts);
+                Map<UUID, float[]> updates = new HashMap<>();
+                for (int j = 0; j < batch.size(); j++) {
+                    updates.put(batch.get(j).id(), embeddings.get(j));
+                }
+                repository.updateEmbeddingsBatch(updates);
+                processed += batch.size();
+                if (processed % 100 == 0 || processed == missing.size()) {
+                    log.info("Embedding pass [{}] progress: {}/{}", split, processed, missing.size());
+                }
             }
+            totalProcessed += processed;
+            log.info("Embedding pass [{}] done: {}/{} row(s)", split, processed, missing.size());
+        }
+
+        if (totalProcessed > 0) {
+            Map<String, Long> counts = repository.countBySplit();
+            StringBuilder summary = new StringBuilder();
+            for (String split : SPLIT_ORDER) {
+                if (summary.length() > 0) {
+                    summary.append(", ");
+                }
+                summary.append(split).append('=').append(counts.getOrDefault(split, 0L));
+            }
+            log.info("Embedding pass summary: processed {} row(s), per-split totals [{}]", totalProcessed, summary);
+        } else {
+            log.info("Embedding pass: nothing to do (all splits fully embedded)");
         }
     }
 

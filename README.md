@@ -109,6 +109,8 @@ ollama pull nomic-embed-text:v1.5                        # one-time
 
 Then click **Run**. The `dev` profile (see `application-dev.yml`) points `MEDICALMCP_DB_HOST` at `localhost`, so the IDE process connects to the containerised Postgres.
 
+Add `debug` to **Active profiles** (e.g. `dev,debug`) for verbose internal logging: per-package DEBUG on every `com.example.medicalmcp.*` module, TRACE on the embedding pool worker loop, DEBUG on `JdbcTemplate` (SQL statements + bind parameters), and `management.endpoint.health.show-details: always` so `/actuator/health` exposes the per-endpoint LLM probe details. Useful for tracing MCP request flows end-to-end; expect ~10× more console output.
+
 **Dataset ingest** — first run with `MEDICALMCP_DATASET_LOADER_ENABLED=true` streams the three HuggingFace CSVs (train / validation / test, configured in `medicalmcp.dataset.loader.sources`) straight into Postgres via `DatasetLoaderService` (no files written to disk), then embeds all 2,464 rows through the local Ollama endpoint. Idempotent — if `COUNT(*) > 0` the pass is skipped.
 
 To trigger a clean reload (e.g. after pulling new upstream data), stop the app and reset the volume:
@@ -154,6 +156,14 @@ Flyway migrations are applied automatically from `src/main/resources/db/migratio
 | E2E smoke (SSE client)       | `mvn verify -Pe2e`         |
 | Quality gate (test split)    | `mvn verify -Pquality`     |
 | Prompt lab (offline eval)    | `mvn verify -Pprompt-lab`  |
+
+### Spring profiles
+
+| Profile             | File / source               | What it does                                                                                  |
+|---------------------|-----------------------------|-----------------------------------------------------------------------------------------------|
+| `default`           | `application.yml`           | Production defaults — INFO logs, `db` health indicator on.                                    |
+| `dev`               | `application-dev.yml`       | `MEDICALMCP_DB_HOST=localhost`, dataset loader on, embedding endpoint at `localhost:11434`.   |
+| `debug`             | `application-debug.yml`     | DEBUG on every `com.example.medicalmcp.*` module, TRACE on the embedding pool worker, DEBUG on `JdbcTemplate` (SQL + bind params), `management.endpoint.health.show-details: always`. Combine with `dev`: `dev,debug`. |
 
 Full deployment guide: [docs/05-deployment.md](docs/05-deployment.md)
 

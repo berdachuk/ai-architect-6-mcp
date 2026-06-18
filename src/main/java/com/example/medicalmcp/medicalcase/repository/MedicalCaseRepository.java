@@ -25,6 +25,8 @@ public interface MedicalCaseRepository {
 
     List<MedicalCase> findWithoutEmbeddings();
 
+    List<MedicalCase> findWithoutEmbeddingsBySplit(String split);
+
     List<SemanticMatch> semanticSearch(float[] queryEmbedding, String specialty, int topK, double minSimilarity);
 
     void updateEmbeddingsBatch(Map<UUID, float[]> embeddings);

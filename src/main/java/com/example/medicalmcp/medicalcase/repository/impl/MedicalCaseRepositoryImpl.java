@@ -48,6 +48,9 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     @InjectSql("/sql/medicalcase/findWithoutEmbeddings.sql")
     private String findWithoutEmbeddingsSql;
 
+    @InjectSql("/sql/medicalcase/findWithoutEmbeddingsBySplit.sql")
+    private String findWithoutEmbeddingsBySplitSql;
+
     @InjectSql("/sql/medicalcase/updateEmbedding.sql")
     private String updateEmbeddingSql;
 
@@ -120,6 +123,15 @@ public class MedicalCaseRepositoryImpl implements MedicalCaseRepository {
     @Override
     public List<MedicalCase> findWithoutEmbeddings() {
         return jdbc.query(findWithoutEmbeddingsSql, Map.of(), (rs, rowNum) -> mapMedicalCase(rs));
+    }
+
+    @Override
+    public List<MedicalCase> findWithoutEmbeddingsBySplit(String split) {
+        if (!StringUtils.hasText(split) || !VALID_SPLITS.contains(split)) {
+            return List.of();
+        }
+        return jdbc.query(
+                findWithoutEmbeddingsBySplitSql, Map.of("split", split), (rs, rowNum) -> mapMedicalCase(rs));
     }
 
     @Override

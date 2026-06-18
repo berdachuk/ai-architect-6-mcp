@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
+import com.example.medicalmcp.embedding.service.EmbeddingHealth;
 
 public class EmbeddingEndpointPool {
 
@@ -66,6 +67,18 @@ public class EmbeddingEndpointPool {
         EmbeddingTask task = new EmbeddingTask(text);
         taskQueue.offer(task);
         return task.getFutures().getFirst();
+    }
+
+    public List<EndpointState> getEndpoints() {
+        return endpoints;
+    }
+
+    public List<EmbeddingHealth> pingAll() {
+        List<EmbeddingHealth> results = new ArrayList<>(endpoints.size());
+        for (EndpointState endpoint : endpoints) {
+            results.add(endpoint.ping());
+        }
+        return results;
     }
 
     public List<CompletableFuture<List<Double>>> embedBatch(List<String> texts) {
