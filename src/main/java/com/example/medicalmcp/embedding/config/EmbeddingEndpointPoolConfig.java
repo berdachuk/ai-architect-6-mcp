@@ -55,8 +55,10 @@ public class EmbeddingEndpointPoolConfig {
                 }
             }
 
-            OpenAiEmbeddingModel model =
-                    new OpenAiEmbeddingModel(MetadataMode.EMBED, optionsBuilder.build());
+            OpenAiEmbeddingModel model = OpenAiEmbeddingModel.builder()
+                    .metadataMode(MetadataMode.EMBED)
+                    .options(optionsBuilder.build())
+                    .build();
             endpointStates.add(new EndpointState(baseUrl, endpointConfig.getModel(), model));
             int workers = endpointConfig.getWorkers() != null
                     ? endpointConfig.getWorkers()

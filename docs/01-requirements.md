@@ -453,7 +453,7 @@ spring:
       - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
       - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
   datasource:
-    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5432/${MEDICALMCP_DB_NAME:medical_mcp}
+    url: jdbc:postgresql://${MEDICALMCP_DB_HOST:localhost}:5436/${MEDICALMCP_DB_NAME:medical_mcp}
     username: ${MEDICALMCP_DB_USERNAME:medical_mcp}
     password: ${MEDICALMCP_DB_PASSWORD:medical_mcp}
     hikari:
