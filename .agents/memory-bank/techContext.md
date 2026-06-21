@@ -12,15 +12,18 @@
 | JDBC | `NamedParameterJdbcTemplate` only — **no JPA** |
 | Embeddings | Ollama `nomic-embed-text:v1.5` @ 768 via `EmbeddingEndpointPool` |
 | MCP transport | Spring MVC SSE, port `8092` |
+| ID type | 24-char hex string (MongoDB ObjectId algorithm, M-18) — not UUID |
 
 Detail: [docs/02-architecture.md § Stack](../docs/02-architecture.md#stack--versions)
 
-## Build & test (planned)
+## Build & test
 
 ```bash
 mvn test                          # unit + Modulith
 mvn verify -Pintegration          # Testcontainers (pgvector/pg17)
 mvn verify -Pquality              # test-split retrieval benchmarks
+mvn verify -Pprompt-lab           # prompt-lab eval + MCP tools IT
+mvn verify -Pprompt-lab-quality   # retrieval + prompt-lab test-split gates
 mvn spring-boot:run               # local :8092/sse
 ```
 
@@ -34,7 +37,7 @@ Profiles: [docs/04-testing.md §3](../docs/04-testing.md#3-test-pyramid)
 
 ### Windows + Docker
 
-On Windows dev machines, **use WSL** to access Docker (Docker Desktop WSL2 backend). Run `docker` CLI, `docker compose`, and `mvn verify -Pintegration` (Testcontainers) from a **WSL shell** — not native PowerShell/CMD. Clone or work under the WSL filesystem (`~/projects/...`) when possible for better I/O; otherwise `cd` to `/mnt/c/...` from WSL.
+On Windows dev machines, **use WSL** to access Docker (Docker Desktop WSL2 backend). Run `docker` CLI, `docker compose`, and `mvn verify -Pintegration` (Testcontainers) from a **WSL shell** — not native PowerShell/CMD. See [DEC-009](records/decisions/DEC-009.md).
 
 ## Local prerequisites
 
@@ -47,6 +50,6 @@ On Windows dev machines, **use WSL** to access Docker (Docker Desktop WSL2 backe
 | Artifact | Status |
 |---|---|
 | `docs/` v2.0.0 | ✅ Complete |
-| `pom.xml` / `src/` | ✅ M1–M8 + M9–M15 + M-17 complete |
-| `.agents/` AI context | ✅ Bootstrapped |
-| CI workflow | ✅ Configured (ci.yml + quality.yml) |
+| `pom.xml` / `src/` | ✅ M1–M8 + M9–M15 + M-17, M-18 complete |
+| `.agents/` AI context | ✅ Multi-agent-safe (DEC-012) |
+| CI workflow | ✅ Configured (ci.yml + quality.yml); M-16 combined gates pending |

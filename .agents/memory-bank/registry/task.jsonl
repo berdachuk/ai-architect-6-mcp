@@ -1,0 +1,3 @@
+{"id":"TASK-001","plan":"M-16","summary":"Add prompt-lab-quality CI job running mvn verify -Pprompt-lab-quality on push/PR to develop","status":"pending","module":"core"}
+{"id":"TASK-002","plan":"M-16","summary":"Verify job passes with offline stub (no live Ollama required)","status":"pending","module":"promptlab"}
+{"id":"TASK-003","plan":"M-16","summary":"Confirm existing unit, integration, prompt-lab jobs unchanged","status":"pending","module":"core"}

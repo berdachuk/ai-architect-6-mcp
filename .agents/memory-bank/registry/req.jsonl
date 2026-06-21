@@ -1,0 +1,18 @@
+{"id":"REQ-001","summary":"Load HuggingFace medical-cases dataset into PostgreSQL via Flyway-managed schema","section":"docs/01-requirements.md#2","module":"dataset","domain_models":["MedicalCase"]}
+{"id":"REQ-002","summary":"Persist 5 HF columns + server columns (id, split, embedding, fts, created_at)","section":"docs/01-requirements.md#2","module":"medicalcase","domain_models":["MedicalCase"]}
+{"id":"REQ-003","summary":"Specialty filter uses exact 13 medical_specialty labels verbatim","section":"docs/01-requirements.md#2","module":"retrieval","domain_models":["SpecialtyCount"]}
+{"id":"REQ-004","summary":"All embeddings routed through mandatory EmbeddingEndpointPool; >=1 endpoint required; fail fast at startup if empty","section":"docs/01-requirements.md#4","module":"embedding","domain_models":[]}
+{"id":"REQ-005","summary":"Flyway schema: medical_case table, HNSW cosine index, GIN tsvector, specialty + trigram indexes","section":"docs/01-requirements.md#5","module":"core","domain_models":[]}
+{"id":"REQ-006","summary":"MCP surface: 5 tools, 2 resources, 1 prompt, 0 completions — dataset fields only","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["CaseSummary","SemanticMatch","SpecialtyCount","DatasetStats"]}
+{"id":"REQ-007","summary":"Two-pass dataset load: pass 1 insert rows, pass 2 backfill embeddings; idempotent on restart","section":"docs/01-requirements.md#7","module":"dataset","domain_models":[]}
+{"id":"REQ-008","summary":"search_cases tool: FTS across sample_name, description, transcription, keywords with optional specialty/split filter and limit","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["CaseSummary"]}
+{"id":"REQ-009","summary":"get_case tool: fetch full MedicalCase by 24-char hex id","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["MedicalCase"]}
+{"id":"REQ-010","summary":"semantic_search tool: embed query via nomic-embed-text v1.5, pgvector HNSW cosine, optional specialty pre-filter, topK, minSimilarity","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["SemanticMatch"]}
+{"id":"REQ-011","summary":"list_specialties tool: 13 labels with row counts","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["SpecialtyCount"]}
+{"id":"REQ-012","summary":"get_dataset_stats tool + medical://stats resource: totals, bySpecialty, bySplit; Caffeine cached 60s","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["DatasetStats"]}
+{"id":"REQ-013","summary":"medical://cases/{id} resource: full case by id","section":"docs/01-requirements.md#6","module":"mcp","domain_models":["MedicalCase"]}
+{"id":"REQ-014","summary":"case-analysis prompt: inject dataset fields; focus options description|transcription|keywords|specialty|all","section":"docs/01-requirements.md#6","module":"mcp","domain_models":[]}
+{"id":"REQ-015","summary":"Embedding input text: {sampleName}. {description} {keywords} — omit keywords when null; exclude transcription","section":"docs/01-requirements.md#4","module":"embedding","domain_models":[]}
+{"id":"REQ-016","summary":"Spring Modulith package modules with explicit allowedDependencies; verify() in CI","section":"docs/01-requirements.md#9","module":"all","domain_models":[]}
+{"id":"REQ-017","summary":"Interface/impl separation: service/ + repository/ public; impl/ has @Service/@Repository; mcp never imports *.impl.*","section":"docs/01-requirements.md#9","module":"all","domain_models":[]}
+{"id":"REQ-018","summary":"Optional prompt-lab profile (M9/M10): promptlab module, ReAct prompts, label normalization, eval on validation, gate on test","section":"docs/01-requirements.md#18","module":"promptlab","domain_models":[]}
