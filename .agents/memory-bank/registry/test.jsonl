@@ -1,0 +1,13 @@
+{"id":"TEST-001","class":"ModulithArchitectureTest","module":"core","profile":"default","req_ids":["REQ-016","NFR-008"]}
+{"id":"TEST-002","class":"FlywaySchemaIntegrationTest","module":"core","profile":"integration","req_ids":["REQ-005"]}
+{"id":"TEST-003","class":"DatasetLoaderIntegrationTest","module":"dataset","profile":"integration","req_ids":["REQ-007","SCN-006"]}
+{"id":"TEST-004","class":"MedicalCaseRepositoryIntegrationTest","module":"medicalcase","profile":"integration","req_ids":["REQ-002","REQ-003"]}
+{"id":"TEST-005","class":"FtsRetrievalQualityIntegrationTest","module":"retrieval","profile":"quality","req_ids":["REQ-008","NFR-001","NFR-009","SCN-001"]}
+{"id":"TEST-006","class":"SemanticRetrievalQualityIntegrationTest","module":"retrieval","profile":"quality","req_ids":["REQ-010","NFR-002","NFR-009","SCN-003"]}
+{"id":"TEST-007","class":"McpToolsContractIntegrationTest","module":"mcp","profile":"integration","req_ids":["REQ-006","SCN-001","SCN-002","SCN-003","SCN-004","SCN-005"]}
+{"id":"TEST-008","class":"McpResourcesIntegrationTest","module":"mcp","profile":"integration","req_ids":["REQ-013","REQ-012"]}
+{"id":"TEST-009","class":"McpSseSmokeIntegrationTest","module":"mcp","profile":"e2e","req_ids":["REQ-006","NFR-001"]}
+{"id":"TEST-010","class":"RetrievalQualityGateIntegrationTest","module":"retrieval","profile":"quality","req_ids":["NFR-009"]}
+{"id":"TEST-011","class":"PromptLabGateIntegrationTest","module":"promptlab","profile":"prompt-lab-quality","req_ids":["REQ-018","NFR-009"]}
+{"id":"TEST-012","class":"StatsCacheTtlIntegrationTest","module":"retrieval","profile":"integration","req_ids":["REQ-012","NFR-004"]}
+{"id":"TEST-013","class":"MedicalCasePromptsStructureTest","module":"mcp","profile":"default","req_ids":["REQ-014"]}

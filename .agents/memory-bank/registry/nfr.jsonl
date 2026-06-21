@@ -1,0 +1,9 @@
+{"id":"NFR-001","metric":"search_cases p99","target":"< 100 ms","section":"docs/01-requirements.md#8"}
+{"id":"NFR-002","metric":"semantic_search p99 (excl. embedding)","target":"< 400 ms","section":"docs/01-requirements.md#8"}
+{"id":"NFR-003","metric":"get_case p99","target":"< 30 ms","section":"docs/01-requirements.md#8"}
+{"id":"NFR-004","metric":"get_dataset_stats p99 (cached)","target":"< 20 ms","section":"docs/01-requirements.md#8"}
+{"id":"NFR-005","metric":"Startup (embeddings stored)","target":"< 10 s","section":"docs/01-requirements.md#8"}
+{"id":"NFR-006","metric":"Persistence","target":"JDBC only — NamedParameterJdbcTemplate; no JPA/Hibernate","section":"docs/01-requirements.md#8"}
+{"id":"NFR-007","metric":"Embedding pool","target":">=1 valid URL; fail fast at startup","section":"docs/01-requirements.md#8"}
+{"id":"NFR-008","metric":"Modularity","target":"ApplicationModules.of(...).verify() passes","section":"docs/01-requirements.md#8"}
+{"id":"NFR-009","metric":"Retrieval quality","target":"FTS + semantic gates on test split (04-testing.md §6)","section":"docs/01-requirements.md#8"}

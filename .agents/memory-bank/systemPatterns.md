@@ -21,7 +21,7 @@ system       → core, embedding
 
 | Module | Package | Responsibilities | Domain models |
 |---|---|---|---|
-| `core` | `...core` | Config, security, exceptions, Flyway bootstrap | — |
+| `core` | `...core` | Config, security, exceptions, Flyway bootstrap, `@InjectSql` infra | — |
 | `medicalcase` | `...medicalcase` | Domain records, `MedicalCaseRepository` API + JDBC impl | `MedicalCase`, `CaseSummary`, `SemanticMatch`, `SpecialtyCount`, `DatasetStats` |
 | `embedding` | `...embedding` | `EmbeddingService`, `EmbeddingEndpointPool`, manual `OpenAiEmbeddingModel` | — (infra service) |
 | `retrieval` | `...retrieval` | `VectorSearchService` — FTS, pgvector ANN, stats | Uses `medicalcase` records |
@@ -45,12 +45,13 @@ system       → core, embedding
 | FTS / semantic search | §6, §8 | `retrieval` | `FtsRetrievalQualityTest`, `SemanticRetrievalQualityTest` |
 | Modulith boundaries | §9 | all `package-info.java` | `ModulithArchitectureTest` |
 
-Executable BDD: **not yet introduced** — use [bdd-traceability skill](../skills/bdd-traceability/SKILL.md) when adding `src/test/resources/features/`.
+Full requirement → module → scenario → test matrix is generated in [productContext.md](productContext.md) from `registry/*.jsonl`. Executable BDD: not yet introduced — use [bdd-traceability skill](../skills/bdd-traceability/SKILL.md) when adding `src/test/resources/features/`.
 
 ## Known gaps
 
-- Requirement IDs (`REQ-###`) partially assigned in plans — formalize in M3+.
-- M-16 CI combined quality gates pending.
+- `REQ-###` formally assigned in `registry/req.jsonl`; traceability tables generated.
+- M-16 CI combined quality gates pending (see `records/active/M16.md`).
+- RISK-001: `docs/01-requirements.md §5` schema still shows `id UUID` — code uses 24-char hex `TEXT` (M-18).
 
 ## Modulith named interfaces
 
@@ -59,4 +60,4 @@ Cross-module `allowedDependencies` must reference explicit named interfaces, not
 - `medicalcase :: domain` — `@NamedInterface` on `medicalcase/domain`
 - `medicalcase :: repository` — `@NamedInterface` on `medicalcase/repository`
 
-Consumers: `dataset`, `retrieval` (and later `mcp`).
+Consumers: `dataset`, `retrieval` (and later `mcp`). See [DEC-008](records/decisions/DEC-008.md).

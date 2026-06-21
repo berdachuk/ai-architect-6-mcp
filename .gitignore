@@ -63,3 +63,6 @@ data/
 
 # AI / agent local state (optional adapters)
 .cursor/mcp.json
+
+# Memory-bank worktree scratchpads (per-branch transient state, never merge)
+.agents/memory-bank/worktrees/
